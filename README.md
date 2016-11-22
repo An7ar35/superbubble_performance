@@ -1,2 +1,4 @@
-# superbubble_performance
-Test of the different superbubble identifications algorithms in genome sequencing
+# ReadMe #
+
+Test of the different superbubble identifications algorithms in 
+genome sequencing
