@@ -33,6 +33,7 @@ namespace eadlib {
             bool reset();
 
             std::streamsize read( std::vector<char> &buffer, const size_t &block_size );
+            std::streamsize peek( std::vector<char> &buffer, const size_t &block_size );
             std::streamsize readLine( std::vector<char> &buffer );
 
             bool isOpen() const;
@@ -165,7 +166,8 @@ namespace eadlib {
             }
             if( block_size > buffer.size() ) {
                 buffer.resize( block_size, ' ' );
-            }std::streamoff s { 0 };
+            }
+            std::streamoff s { 0 };
             _input_stream->read( buffer.data(), block_size );
             s = _input_stream->gcount();
             if( reachedEOF( _cursor + s ) ) {
@@ -181,6 +183,40 @@ namespace eadlib {
         }
 
         /**
+         * Peeks a block of text into a buffer
+         * @param buffer     Text buffer
+         * @param block_size Size of the block
+         * @return Size of the text read into buffer
+         */
+        inline std::streamsize FileReader::peek( std::vector<char> &buffer, const size_t &block_size ) {
+            if( !_input_stream->is_open() ) {
+                LOG_ERROR( "[eadlib::io::FileReader::peek( <buffer>, ", block_size, " )] "
+                    "Input stream to '", _file_name, "' is not open." );
+                return -1;
+            }
+            if( _completed_read ) {
+                LOG_ERROR( "[eadlib::io::FileReader::peek( <buffer>, ", block_size, " )] "
+                    "Read of '", _file_name, "' is already completed. Reset() to peek again." );
+                return -1;
+            }
+            if( block_size > buffer.size() ) {
+                buffer.resize( block_size, ' ' );
+            }
+            std::streampos original_position = _input_stream->tellg();
+            std::streamoff s { 0 };
+            _input_stream->read( buffer.data(), block_size );
+            s = _input_stream->gcount();
+            if( s > 0 ) {
+                _input_stream->seekg( original_position );
+            }
+            if( _input_stream->bad() ) {
+                LOG_ERROR( "[eadlib::io::FileReader::peek( <buffer>, ", block_size, " )] "
+                    "Problem occurred reading the input stream of '", _file_name, "': ", strerror( errno ) );
+            }
+            return s;
+        }
+
+        /**
          * Reads into the buffer up to the end of the line ('\n')
          * @param buffer Text buffer
          * @return Size of text read into buffer
@@ -190,7 +226,7 @@ namespace eadlib {
                 LOG_ERROR( "[eadlib::io::FileReader::readLine()] Input stream to '", _file_name, "' is not open." );
                 return -1;
             }
-            if( reachedEOF( _cursor ) ) {
+            if( _completed_read ) {
                 LOG_ERROR( "[eadlib::io::FileReader::readLine()] Reached EOF. No more data." );
                 return -1;
             }
@@ -216,7 +252,7 @@ namespace eadlib {
                     }
                 }
             }
-            _completed_read = reachedEOF( _cursor + char_count );
+            _completed_read = reachedEOF( _cursor + char_count ) || _input_stream->eof();
             _cursor = _input_stream->tellg();
             return char_count;
         }
