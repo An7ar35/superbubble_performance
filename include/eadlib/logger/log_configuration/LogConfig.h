@@ -6,8 +6,8 @@
 #include <zconf.h>
 #include "OutputConfiguration.h"
 #include "LogLevel_types.h"
-#include "../log_outputs/LogOutput_types.h"
-#include "../log_formatters/Formatter_types.h"
+#include "eadlib/logger/log_outputs/LogOutput_types.h"
+#include "eadlib/logger/log_formatters/Formatter_types.h"
 
 namespace eadlib {
     namespace log {

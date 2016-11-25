@@ -17,7 +17,7 @@
 #define EADLIB_TARJAN_H
 
 #include "../logger/Logger.h"
-#include "../datastructure/Graph.h"
+#include "eadlib/datastructure/Graph.h"
 
 namespace eadlib {
     namespace algo {

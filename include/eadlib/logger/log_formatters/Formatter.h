@@ -3,8 +3,8 @@
 
 #include <stdint.h>
 #include <iostream>
-#include "../log_configuration/TimeStamp.h"
-#include "../log_configuration/LogLevel_types.h"
+#include "eadlib/logger/log_configuration/TimeStamp.h"
+#include "eadlib/logger/log_configuration/LogLevel_types.h"
 
 namespace eadlib {
     namespace log {

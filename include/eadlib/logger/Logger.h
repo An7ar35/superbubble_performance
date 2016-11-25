@@ -22,7 +22,7 @@
 #include <vector>
 #include <exception>
 #include <mutex>
-#include "log_configuration/LogConfig.h"
+#include "eadlib/logger/log_configuration/LogConfig.h"
 
 #ifndef NDEBUG
     #define LOG_FATAL eadlib_logger_instance.print< eadlib::log::LogLevel_types::Type::FATAL >

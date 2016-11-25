@@ -3,15 +3,15 @@
 
 #include <memory>
 
-#include "../log_outputs/LogOutput.h"
-#include "../log_outputs/LogOutput_types.h"
-#include "../log_formatters/Formatter.h"
-#include "../log_formatters/Formatter_types.h"
-#include "../log_outputs/LogOutput_Terminal.h"
-#include "../log_outputs/LogOutput_FileAppend.h"
-#include "../log_outputs/LogOutput_FileOverwrite.h"
-#include "../log_formatters/Formatter_Terminal.h"
-#include "../log_outputs/LogOutput_FileNew.h"
+#include "eadlib/logger/log_outputs/LogOutput.h"
+#include "eadlib/logger/log_outputs/LogOutput_types.h"
+#include "eadlib/logger/log_formatters/Formatter.h"
+#include "eadlib/logger/log_formatters/Formatter_types.h"
+#include "eadlib/logger/log_outputs/LogOutput_Terminal.h"
+#include "eadlib/logger/log_outputs/LogOutput_FileAppend.h"
+#include "eadlib/logger/log_outputs/LogOutput_FileOverwrite.h"
+#include "eadlib/logger/log_formatters/Formatter_Terminal.h"
+#include "eadlib/logger/log_outputs/LogOutput_FileNew.h"
 
 namespace eadlib {
     namespace log {
