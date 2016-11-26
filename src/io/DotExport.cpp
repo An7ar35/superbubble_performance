@@ -21,7 +21,7 @@ sbp::io::DotExport::~DotExport() {}
  */
 bool sbp::io::DotExport::exportToDot( const eadlib::WeightedGraph<std::string> &graph, const bool &weight_label ) {
     if( !_writer.isOpen() && !_writer.open() ) {
-        LOG_ERROR( "[sbp::io::DotExport::export(..)] Could not open file '", _writer.getFileName(), "'." );
+        LOG_ERROR( "[sbp::io::DotExport::exportToDot(..)] Could not open file '", _writer.getFileName(), "'." );
         return false;
     }
     _writer.write( "digraph genome {\n" );
