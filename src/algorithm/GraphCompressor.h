@@ -1,7 +1,7 @@
 #ifndef SUPERBUBBLE_PERFORMANCE_GRAPHCOMPRESSOR_H
 #define SUPERBUBBLE_PERFORMANCE_GRAPHCOMPRESSOR_H
 
-namespace sb {
+namespace sbp {
     namespace algo {
         class GraphCompressor {
 

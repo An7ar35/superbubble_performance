@@ -1,7 +1,7 @@
 #ifndef SUPERBUBBLE_PERFORMANCE_GRAPHEXPORT_H
 #define SUPERBUBBLE_PERFORMANCE_GRAPHEXPORT_H
 
-namespace sb {
+namespace sbp {
     namespace io {
         class GraphExport {
 
