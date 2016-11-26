@@ -1,38 +1,33 @@
 /**
-   Component Name:  EADlib.Graph
-   Language:        C++14
+    @class          eadlib::Graph
+    @brief          [ADT] Directed %Graph
 
-   License: GNUv2 Public License
-   (c) Copyright E. A. Davison 2016
+    Uses an unordered_map to create adjacency lists with reverse lookup capability
+    - Map Key:     the node <T>
+    - Map Value:   container that has:
+                  - list of the children of the node
+                  - list of the parents of the node
 
-   Author: E. A. Davison
-
-   Description: Graph ADT datastructure
-   Dependencies: eadlib::Logger
-                 eadlib::exception:corruption
+    @dependencies   eadlib::logger::Logger, eadlib::exception::corruption
+    @author         E. A. Davison
+    @copyright      E. A. Davison 2016
+    @license        GNUv2 Public License
 **/
-
 #ifndef EADLIB_GRAPH_H
 #define EADLIB_GRAPH_H
 
+#include <iostream>
 #include <initializer_list>
 #include <bits/stl_list.h>
 #include <algorithm>
 #include <vector>
+#include <list>
 #include <unordered_map>
 
 #include "../logger/Logger.h"
 #include "../exception/corruption.h"
 
 namespace eadlib {
-    // ----------------
-    // eadlib::Graph<T>
-    // ----------------
-    // Uses an unordered_map to create adjacency lists with reverse lookup capability
-    // Map Key:     the node <T>
-    // Map Value:   container that has:
-    //               - list of the children of the node
-    //               - list of the parents of the node
     template<class T> class Graph {
       public:
         //Type and inner class definitions
@@ -68,9 +63,9 @@ namespace eadlib {
         size_t getInDegree( const T &node ) const;
         size_t getOutDegree( const T &node ) const;
         //Print out
-        std::ostringstream printAdjacencyList() const;
-        std::ostringstream printGraphNodes() const;
-        std::ostringstream printStats() const;
+        std::ostream & printAdjacencyList( std::ostream &out ) const;
+        std::ostream & printGraphNodes( std::ostream &out ) const;
+        std::ostream & printStats( std::ostream &out ) const;
       private:
         bool checkNodesExist( const T& from, const T &to ) const;
         Graph_t m_adjacencyList;
@@ -434,40 +429,37 @@ namespace eadlib {
      * Gets the adjacency list in printable format
      * @return Output string stream of adjacency list
      */
-    template<class T> std::ostringstream Graph<T>::printAdjacencyList() const {
-        std::ostringstream oss;
+    template<class T> std::ostream & Graph<T>::printAdjacencyList( std::ostream &out ) const {
         for( typename Graph_t::const_iterator it = m_adjacencyList.cbegin(); it != m_adjacencyList.cend(); ++it ) {
-            oss << "[" << it->first << "] -> ";
+            out << "[" << it->first << "] -> ";
             for( T node : it->second.childrenList ) {
-                oss << "[" << node << "] ";
+                out << "[" << node << "] ";
             }
-            if( it != m_adjacencyList.cend()) oss << "\n";
+            if( it != m_adjacencyList.cend()) out << "\n";
         }
-        return oss;
+        return out;
     }
 
     /**
      * Gets the list of all nodes in the graph in printable format
      * @return Output string stream list of Nodes
      */
-    template<class T> std::ostringstream Graph<T>::printGraphNodes() const {
-        std::ostringstream oss;
+    template<class T> std::ostream & Graph<T>::printGraphNodes( std::ostream &out ) const {
         for( typename Graph_t::const_iterator it = m_adjacencyList.cbegin(); it != m_adjacencyList.cend(); ++it ) {
-            oss << it->first;
-            if( it != m_adjacencyList.cend() ) oss << "\n";
+            out << it->first;
+            if( it != m_adjacencyList.cend() ) out << "\n";
         }
-        return oss;
+        return out;
     }
 
     /**
      * Gets the graph stats in a printable format
      * @return Output string stream of the number of nodes and edges
      */
-    template<class T> std::ostringstream Graph<T>::printStats() const {
-        std::ostringstream oss;
-        oss << "Number of nodes: " << this->size() << "\n";
-        oss << "Number of edges: " << m_edgeCount << "\n";
-        return oss;
+    template<class T> std::ostream & Graph<T>::printStats( std::ostream &out ) const {
+        out << "Number of nodes: " << this->size() << "\n";
+        out << "Number of edges: " << m_edgeCount << "\n";
+        return out;
     }
 
     /**

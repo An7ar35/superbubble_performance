@@ -1,24 +1,24 @@
 /**
-   Component Name:  EADlib.WeightedGraph
-   Language:        C++14
-
-   License: GNUv2 Public License
-   (c) Copyright E. A. Davison 2016
-
-   Author: E. A. Davison
-
-   Description: Weighted Graph ADT datastructure
-   Dependencies: eadlib::Logger
-                 eadlib::exception:corruption
+    @class          eadlib::WeightedGraph
+    @brief          [ADT] Directed MultiGraph
+    @dependencies   eadlib::logger::Logger, eadlib::exception:corruption
+    @author         E. A. Davison
+    @copyright      E. A. Davison 2016
+    @license        GNUv2 Public License
 **/
 
 #ifndef EADLIB_WEIGHTEDGRAPH_H
 #define EADLIB_WEIGHTEDGRAPH_H
 
-#include <initializer_list>
+#include <iostream>
 #include <algorithm>
-#include <vector>
+#include <initializer_list>
 #include <unordered_map>
+#include <vector>
+#include <list>
+
+#include "../logger/Logger.h"
+#include "../exception/corruption.h"
 
 namespace eadlib {
     template<class T> class WeightedGraph {
@@ -26,9 +26,9 @@ namespace eadlib {
         //Type and inner class definitions
         typedef std::unordered_map<T, size_t> EdgeWeights_t;
         struct NodeAdjacency {
-            std::list<T>  childrenList = std::list<T>(); //directed edge
+            std::list<T>  childrenList = std::list<T>();  //directed edge
             EdgeWeights_t weight       = EdgeWeights_t(); //weight of edges
-            std::list<T>  parentsList  = std::list<T>(); //reverse lookup of directed edge
+            std::list<T>  parentsList  = std::list<T>();  //reverse lookup of directed edge
         };
         typedef std::unordered_map<T, NodeAdjacency> Graph_t;
         //Constructors/Destructor
@@ -64,9 +64,9 @@ namespace eadlib {
         size_t getInDegree_weighted( const T &node );
         size_t getOutDegree_weighted( const T &node );
         //Print out
-        std::ostringstream printAdjacencyList() const;
-        std::ostringstream printGraphNodes() const;
-        std::ostringstream printStats() const;
+        std::ostream & printAdjacencyList( std::ostream &out ) const;
+        std::ostream & printGraphNodes( std::ostream &out ) const;
+        std::ostream & printStats( std::ostream &out ) const;
       private:
         bool checkNodesExist( const T &a, const T &b ) const;
         template <class U> bool checkOverflow( U a, U b ) const;
@@ -230,7 +230,7 @@ namespace eadlib {
     }
 
     /**
-     *
+     * Adds and links two directed nodes together
      * @param from Origin node for the directed edge
      * @param to   Destination node for the directed edge
      * @return Success
@@ -270,7 +270,7 @@ namespace eadlib {
     }
 
     /**
-     *
+     * Adds and links two directed nodes together with a given weight
      * @param from   Origin node for the directed edge
      * @param to     Destination node for the directed edge
      * @param weight Edge weight
@@ -565,7 +565,7 @@ namespace eadlib {
     }
 
     /**
-     * Gets the number of individual node that have edge(s) comming into the node
+     * Gets the number of individual node that have edge(s) coming into the node
      * @param node Node
      * @return In degree of the node
      */
@@ -591,7 +591,7 @@ namespace eadlib {
     }
 
     /**
-     * Gets the number of edges comming into the node
+     * Gets the number of edges coming into the node
      * @param node Node
      * @return In degree of the node
      */
@@ -631,40 +631,37 @@ namespace eadlib {
      * Gets the adjacency list in printable format
      * @return Output string stream of adjacency list
      */
-    template<class T> std::ostringstream WeightedGraph<T>::printAdjacencyList() const {
-        std::ostringstream oss;
+    template<class T> std::ostream & WeightedGraph<T>::printAdjacencyList( std::ostream &out ) const {
         for( typename Graph_t::const_iterator it = m_adjacencyList.cbegin(); it != m_adjacencyList.cend(); ++it ) {
-            oss << "[" << it->first << "] -> ";
+            out << "[" << it->first << "] -> ";
             for( T node : it->second.childrenList ) {
-                oss << "[" << node << "]x" << it->second.weight.at( node ) << " ";
+                out << "[" << node << "]x" << it->second.weight.at( node ) << " ";
             }
-            if( it != m_adjacencyList.cend()) oss << "\n";
+            if( it != m_adjacencyList.cend()) out << "\n";
         }
-        return oss;
+        return out;
     }
 
     /**
      * Gets the list of all nodes in the graph in printable format
      * @return Output string stream list of Nodes
      */
-    template<class T> std::ostringstream WeightedGraph<T>::printGraphNodes() const {
-        std::ostringstream oss;
+    template<class T> std::ostream & WeightedGraph<T>::printGraphNodes( std::ostream &out ) const {
         for( typename Graph_t::const_iterator it = m_adjacencyList.cbegin(); it != m_adjacencyList.cend(); ++it ) {
-            oss << it->first;
-            if( it != m_adjacencyList.cend() ) oss << "\n";
+            out << it->first;
+            if( it != m_adjacencyList.cend() ) out << "\n";
         }
-        return oss;
+        return out;
     }
 
     /**
      * Gets the graph stats in a printable format
      * @return Output string stream of the number of nodes and edges
      */
-    template<class T> std::ostringstream WeightedGraph<T>::printStats() const {
-        std::ostringstream oss;
-        oss << "Number of nodes: " << this->size() << "\n";
-        oss << "Number of edges: " << m_edgeCount << "\n";
-        return oss;
+    template<class T> std::ostream & WeightedGraph<T>::printStats( std::ostream &out ) const {
+        out << "Number of nodes: " << nodeCount() << "\n";
+        out << "Number of edges: " << m_edgeCount << "\n";
+        return out;
     }
 
     /**

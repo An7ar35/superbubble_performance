@@ -170,11 +170,11 @@ namespace eadlib {
             std::streamoff s { 0 };
             _input_stream->read( buffer.data(), block_size );
             s = _input_stream->gcount();
-            if( reachedEOF( _cursor + s ) ) {
-                _completed_read = true;
+            _completed_read = reachedEOF( _cursor + s );
+            if( !_completed_read && _input_stream->eof() ) {
+                LOG_ERROR( "[eadlib::io::FileReader::read(..)] Inconsistency: reached EOF with cursor at ", _cursor + s, "/", _size );
             }
             _cursor = _input_stream->tellg();
-
             if( _input_stream->bad() ) {
                 LOG_ERROR( "[eadlib::io::FileReader::read( <buffer>, ", block_size, " )] "
                     "Problem occurred reading the input stream of '", _file_name, "': ", strerror( errno ) );
@@ -231,6 +231,7 @@ namespace eadlib {
                 return -1;
             }
             std::streamoff char_count { 0 };
+            std::streamoff real_count { 0 };
             buffer.clear();
             bool eol_flag { false };
             char character { ' ' };
@@ -242,6 +243,7 @@ namespace eadlib {
                         buffer.emplace_back( character );
                         char_count++;
                     }
+                    real_count++;
                 } else {
                     if( _input_stream->bad() ) {
                         LOG_ERROR( "[eadlib::io::FileReader::readLine()] Problem occurred reading the input stream of '",
@@ -252,7 +254,10 @@ namespace eadlib {
                     }
                 }
             }
-            _completed_read = reachedEOF( _cursor + char_count ) || _input_stream->eof();
+            _completed_read = reachedEOF( _cursor + real_count );
+            if( !_completed_read && _input_stream->eof() ) {
+                LOG_ERROR( "[eadlib::io::FileReader::readLine()] Inconsistency: reached EOF with cursor at ", _cursor + real_count, "/", _size );
+            }
             _cursor = _input_stream->tellg();
             return char_count;
         }
