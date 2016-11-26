@@ -1,13 +1,53 @@
 cmake_minimum_required(VERSION 3.6)
 project(superbubble_performance)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -pthread")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build/")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build/")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build/")
 
 include_directories(include)
 
 set(SOURCE_FILES
         src/main.cpp
         src/io/FastaParser.cpp
-        src/io/FastaParser.h src/io/GraphParser.cpp src/io/GraphParser.h src/io/DotExport.cpp src/io/DotExport.h src/io/GraphExport.cpp src/io/GraphExport.h src/graph/GraphConstructor.cpp src/graph/GraphConstructor.h src/algorithm/GraphCompressor.cpp src/algorithm/GraphCompressor.h src/algorithm/EulerWalk.cpp src/algorithm/EulerWalk.h src/algorithm/Comparator.cpp src/algorithm/Comparator.h)
+        src/io/FastaParser.h
+        src/io/GraphParser.cpp
+        src/io/GraphParser.h
+        src/io/DotExport.cpp
+        src/io/DotExport.h
+        src/io/GraphExport.cpp
+        src/io/GraphExport.h
+        src/graph/GraphConstructor.cpp
+        src/graph/GraphConstructor.h
+        src/algorithm/GraphCompressor.cpp
+        src/algorithm/GraphCompressor.h
+        src/algorithm/EulerWalk.cpp
+        src/algorithm/EulerWalk.h
+        src/algorithm/Comparator.cpp
+        src/algorithm/Comparator.h)
 
-add_executable(superbubble_performance ${SOURCE_FILES})
+add_executable(sbp ${SOURCE_FILES})
+
+#// GTest framework for unit testing
+enable_testing()
+find_package(GTest QUIET)
+
+if( GTEST_FOUND )
+    include_directories(${GTEST_INCLUDE_DIRS})
+
+    set(TEST_FILES
+            tests/main.cpp tests/main.cpp)
+
+    add_executable(
+            sbp_tests
+            ${TEST_FILES})
+
+    target_link_libraries(sbp_tests gtest)
+    add_test(sbp_tests ${TEST_FILES})
+else()
+    message(WARNING, "Google Test package not found. Unit tests will not be compiled...")
+endif()
