@@ -56,6 +56,7 @@ namespace eadlib {
         bool deleteNode( const T &node );
         //Graph state
         bool isReachable( const T &from, const T &to ) const;
+        bool ndoeExists( const T &node ) const;
         bool edgeExists( const T &from, const T &to ) const;
         bool isEmpty() const;
         size_t nodeCount() const;
@@ -349,6 +350,18 @@ namespace eadlib {
         return false;
     }
 
+    /**
+     * Checks if a node exists inside the graph
+     * @param node Key of node to check
+     * @return Node existence
+     */
+    template<class T> bool Graph<T>::nodeExists( const T &node ) const {
+        if( m_adjacencyList.empty() ) {
+            LOG_ERROR( "[eadlib::Graph<T>::nodeExists()( ", node, " )] No nodes in graph." );
+            return false;
+        }
+        return m_adjacencyList.find( node ) != m_adjacencyList.cend();
+    }
 
     /**
      * Checks if a direct directed edge exists between two nodes
@@ -457,8 +470,8 @@ namespace eadlib {
      * @return Output string stream of the number of nodes and edges
      */
     template<class T> std::ostream & Graph<T>::printStats( std::ostream &out ) const {
-        out << "Number of nodes: " << this->size() << "\n";
-        out << "Number of edges: " << m_edgeCount << "\n";
+        out << "Number of nodes: " << nodeCount() << "\n";
+        out << "Number of edges: " << size() << "\n";
         return out;
     }
 

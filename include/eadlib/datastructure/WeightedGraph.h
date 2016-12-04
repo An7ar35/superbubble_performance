@@ -42,6 +42,7 @@ namespace eadlib {
         const_iterator begin() const;
         const_iterator end() const;
         //Graph access
+        const_iterator find( const T&node ) const;
         const NodeAdjacency & at( const T &node ) const;
         //Graph manipulation
         bool createDirectedEdge( const T &from, const T &to );
@@ -54,6 +55,7 @@ namespace eadlib {
         bool deleteNode( const T &n );
         //Graph state
         bool isReachable( const T &from, const T &to ) const;
+        bool nodeExists( const T &node ) const;
         bool edgeExists( const T &from, const T &to ) const;
         bool isEmpty() const;
         size_t getWeight( const T &from, const T &to );
@@ -129,6 +131,15 @@ namespace eadlib {
      */
     template<class T> typename WeightedGraph<T>::const_iterator WeightedGraph<T>::end() const {
         return m_adjacencyList.cend();
+    }
+
+    /**
+     * Finds node in graph
+     * @param node Node to look up in the graph
+     * @return Const iterator to the Adjacency lists of the node
+     */
+    template<class T> typename WeightedGraph<T>::const_iterator WeightedGraph<T>::find( const T &node ) const {
+        return m_adjacencyList.find( node );
     }
 
     /**
@@ -377,7 +388,7 @@ namespace eadlib {
         }
         //Edge weight check
         auto search_weight = m_adjacencyList.at( from ).weight.find( to );
-        if( search_weight == m_adjacencyList.at( from ).weight.end() ) {
+        if( search_weight != m_adjacencyList.at( from ).weight.end() ) {
             m_edgeCount -= m_adjacencyList.at( from ).weight.at( to );
             m_adjacencyList.at( from ).weight.erase( search_weight );
         }
@@ -434,6 +445,9 @@ namespace eadlib {
                     }
                 }
             }
+            for( auto child_weight : search->second.weight ) {
+                m_edgeCount -= child_weight.second;
+            }
             m_adjacencyList.erase( n );
             return true;
         }
@@ -486,6 +500,18 @@ namespace eadlib {
         return false;
     }
 
+    /**
+     * Checks if a node exists inside the graph
+     * @param node Key of node to check
+     * @return Node existence
+     */
+    template<class T> bool WeightedGraph<T>::nodeExists( const T &node ) const {
+        if( m_adjacencyList.empty() ) {
+            LOG_ERROR( "[eadlib::WeightedGraph<T>::nodeExists()( ", node, " )] No nodes in graph." );
+            return false;
+        }
+        return m_adjacencyList.find( node ) != m_adjacencyList.cend();
+    }
 
     /**
      * Checks if a direct directed edge exists between two nodes
@@ -660,7 +686,7 @@ namespace eadlib {
      */
     template<class T> std::ostream & WeightedGraph<T>::printStats( std::ostream &out ) const {
         out << "Number of nodes: " << nodeCount() << "\n";
-        out << "Number of edges: " << m_edgeCount << "\n";
+        out << "Number of edges: " << size() << "\n";
         return out;
     }
 
