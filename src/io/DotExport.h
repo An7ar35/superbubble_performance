@@ -12,8 +12,9 @@ namespace sbp {
             enum class EdgeType { MULTI_EDGE, WEIGHT_LABEL};
             DotExport( eadlib::io::FileWriter &writer );
             ~DotExport();
-            bool exportToDot( const eadlib::WeightedGraph<std::string> &graph,
-                              const bool &weight_label = true );
+            bool exportToDot( const std::string &graph_name,
+                              const eadlib::WeightedGraph<std::string> &graph,
+                              const bool &weight_label );
           private:
             eadlib::io::FileWriter &_writer;
         };

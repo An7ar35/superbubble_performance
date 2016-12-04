@@ -19,16 +19,18 @@ sbp::io::DotExport::~DotExport() {}
  * @param weight_label Shows multi-edges as weight labels (default=true)
  * @return Success
  */
-bool sbp::io::DotExport::exportToDot( const eadlib::WeightedGraph<std::string> &graph, const bool &weight_label ) {
+bool sbp::io::DotExport::exportToDot( const std::string &graph_name,
+                                      const eadlib::WeightedGraph<std::string> &graph,
+                                      const bool &weight_label ) {
     if( !_writer.isOpen() && !_writer.open() ) {
         LOG_ERROR( "[sbp::io::DotExport::exportToDot(..)] Could not open file '", _writer.getFileName(), "'." );
         return false;
     }
-    _writer.write( "digraph genome {\n" );
+    _writer.write( "digraph " + graph_name + " {\n" );
     _writer.write( "\tnode [shape = circle]\n" );
     for( auto node : graph ) {
-        if( node.second.childrenList.empty() ) {
-            _writer.write( "\t" + node.first );
+        if( node.second.childrenList.empty() && node.second.parentsList.empty() ) {
+            _writer.write( "\t" + node.first + ";\n" );
         } else {
             for( auto dest : node.second.childrenList ) {
                 if( weight_label ) { //shows single edges with weight
