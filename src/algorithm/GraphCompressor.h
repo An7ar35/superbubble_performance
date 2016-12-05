@@ -16,10 +16,15 @@ namespace sbp {
             void compress();
           private:
             typedef typename eadlib::WeightedGraph<std::string>::const_iterator GraphIterator_t;
-            const GraphIterator_t seek( const GraphIterator_t &current, const size_t &previous_weight ) const;
-            const GraphIterator_t seek( const GraphIterator_t &previous, const GraphIterator_t &current, const size_t &previous_weight ) const;
+
             size_t compress( const GraphIterator_t &current );
-            bool validateCandidate( const GraphIterator_t &candidate, const size_t &upstream_weight );
+            const GraphIterator_t seek( const GraphIterator_t &current,
+                                        const size_t &previous_weight ) const;
+            const GraphIterator_t seek( const GraphIterator_t &previous,
+                                        const GraphIterator_t &current,
+                                        const size_t &previous_weight ) const;
+            bool validateCandidate( const GraphIterator_t &candidate,
+                                    const size_t &upstream_weight );
 
             eadlib::WeightedGraph<std::string> & _in_graph;
             std::vector<std::string> _vector_of_kmers;

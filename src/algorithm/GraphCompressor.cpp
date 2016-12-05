@@ -32,6 +32,67 @@ void sbp::algo::GraphCompressor::compress() {
 }
 
 /**
+ * Assesses compression possibility from a node and compresses the whole chain
+ * @param node Node to start from
+ * @return Number of nodes compressed
+ */
+size_t sbp::algo::GraphCompressor::compress( const GraphIterator_t &node ) {
+    size_t count { 0 };
+    const GraphIterator_t start_node = seek( node, 0 ); //get to the top of the node chain that can be merged
+    LOG_DEBUG( "[sbp::algo::GraphCompressor::compress( ", node->first, " )] Farthest upstream start point: '", start_node->first, "'." );
+    if( start_node->second.childrenList.size() == 1 ) {
+        std::queue<GraphIterator_t> merge_queue;
+        bool valid_candidate { true };
+        GraphIterator_t current = start_node;
+        //Add all attached candidates for merging to queue
+        do {
+            GraphIterator_t next = _in_graph.find( current->second.childrenList.front() );
+            auto w = current->second.weight.at( next->first );
+            valid_candidate = validateCandidate( next, w );
+            if( valid_candidate ) {
+                merge_queue.push( next );
+                current = next;
+            }
+        } while( !current->second.childrenList.empty() && valid_candidate );
+        //Are there enough nodes to combine?
+        if( merge_queue.size() > 1 ) {
+            LOG_DEBUG( "[sbp::algo::GraphCompressor::compress( ", start_node->first, " )] ", merge_queue.size() + 1, " candidates found in chain." );
+            GraphIterator_t end_node  = merge_queue.back();
+            //Combining the values of the queued nodes
+            std::string merged_string  = start_node->first;
+            while( merge_queue.size() > 1 ) {
+                merged_string += merge_queue.front()->first.back(); //adding last letter
+                _in_graph.deleteNode( merge_queue.front()->first );
+                merge_queue.pop();
+                count++;
+            }
+            merged_string += merge_queue.front()->first.back(); //adding last letter
+            count++;
+            //Creating new node for merged content
+            _in_graph.addNode( merged_string );
+            for( auto parent : start_node->second.parentsList ) {
+                auto in_weight = _in_graph.at( parent ).weight.at( start_node->first );
+                _in_graph.createDirectedEdge( parent, merged_string, in_weight );
+            }
+            for( auto child : end_node->second.childrenList ) {
+                auto out_weight = end_node->second.weight.at( child );
+                _in_graph.createDirectedEdge( merged_string, child, out_weight );
+            }
+            LOG_DEBUG( "[sbp::algo::GraphCompressor::compress( ", start_node->first, " )] "
+                "Compressed ", ( count > 0 ? count + 1 : count ), " nodes into 1." );
+            //Deleting the first and last nodes of the original chain
+            _in_graph.deleteNode( end_node->first );
+            merge_queue.pop();
+            _in_graph.deleteNode( start_node->first );
+            //_vector_of_kmers.emplace_back( merged_string ); //overkill
+        } else {
+            LOG_DEBUG( "[sbp::algo::GraphCompressor::compress( ", start_node->first, " )] Node not in a compressible chain." );
+        }
+    }
+    return count;
+}
+
+/**
  * Seeks the top most node in a compressible chain of nodes
  * @param current Starting point node
  * @param previous_weight Weight of the current->child edge if known
@@ -73,66 +134,6 @@ const sbp::algo::GraphCompressor::GraphIterator_t sbp::algo::GraphCompressor::se
     } else {
         return seek( current, parent, 0 );
     }
-}
-
-/**
- * Assesses compression possibility from a node and compresses the whole chain
- * @param node Node to start from
- * @return Number of nodes compressed
- */
-size_t sbp::algo::GraphCompressor::compress( const GraphIterator_t &node ) {
-    size_t count { 0 };
-    const GraphIterator_t start_node = seek( node, 0 ); //get to the top of the node chain that can be merged
-    LOG_DEBUG( "[sbp::algo::GraphCompressor::compress( ", node->first, " )] Farthest upstream start point: '", start_node->first, "'." );
-    if( start_node->second.childrenList.size() == 1 ) {
-        std::queue<GraphIterator_t> merge_queue;
-        bool valid_candidate { true };
-        GraphIterator_t current = start_node;
-        //Add all attached candidates for merging to queue
-        do {
-            GraphIterator_t next = _in_graph.find( current->second.childrenList.front() );
-            auto w = current->second.weight.at( next->first );
-            valid_candidate = validateCandidate( next, w );
-            if( valid_candidate ) {
-                merge_queue.push( next );
-                current = next;
-            }
-        } while( !current->second.childrenList.empty() && valid_candidate );
-        //Are there enough nodes to combine?
-        if( merge_queue.size() > 1 ) {
-            LOG_DEBUG( "[sbp::algo::GraphCompressor::compress( ", start_node->first, " )] ", merge_queue.size() + 1, " candidates found in chain." );
-            GraphIterator_t end_node  = merge_queue.back();
-            std::string merged_string  = start_node->first;
-            while( merge_queue.size() > 1 ) {
-                merged_string += merge_queue.front()->first.back(); //adding last letter
-                _in_graph.deleteNode( merge_queue.front()->first );
-                merge_queue.pop();
-                count++;
-            }
-            merged_string += merge_queue.front()->first.back(); //adding last letter
-            count++;
-            //Creating new node for merged content
-            _in_graph.addNode( merged_string );
-            for( auto parent : start_node->second.parentsList ) {
-                auto in_weight = _in_graph.at( parent ).weight.at( start_node->first );
-                _in_graph.createDirectedEdge( parent, merged_string, in_weight );
-            }
-            for( auto child : end_node->second.childrenList ) {
-                auto out_weight = end_node->second.weight.at( child );
-                _in_graph.createDirectedEdge( merged_string, child, out_weight );
-            }
-            LOG_DEBUG( "[sbp::algo::GraphCompressor::compress( ", start_node->first, " )] "
-                "Compressed ", ( count > 0 ? count + 1 : count ), " nodes into 1." );
-            //Deleting the old nodes
-            _in_graph.deleteNode( end_node->first );
-            merge_queue.pop();
-            _in_graph.deleteNode( start_node->first );
-            //_vector_of_kmers.emplace_back( merged_string ); //overkill
-        } else {
-            LOG_DEBUG( "[sbp::algo::GraphCompressor::compress( ", start_node->first, " )] Node not in a compressible chain." );
-        }
-    }
-    return count;
 }
 
 /**
