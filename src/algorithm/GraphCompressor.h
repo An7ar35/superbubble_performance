@@ -13,7 +13,7 @@ namespace sbp {
           public:
             GraphCompressor( eadlib::WeightedGraph<std::string> &in_graph );
             ~GraphCompressor();
-            bool compress();
+            void compress();
           private:
             typedef typename eadlib::WeightedGraph<std::string>::const_iterator GraphIterator_t;
             const GraphIterator_t seek( const GraphIterator_t &current, const size_t &previous_weight ) const;

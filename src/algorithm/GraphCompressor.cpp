@@ -14,8 +14,10 @@ sbp::algo::GraphCompressor::GraphCompressor( eadlib::WeightedGraph<std::string> 
  */
 sbp::algo::GraphCompressor::~GraphCompressor() {}
 
-
-bool sbp::algo::GraphCompressor::compress() {
+/**
+ * Compress the graph
+ */
+void sbp::algo::GraphCompressor::compress() {
     for( auto node : _in_graph ) {
         _vector_of_kmers.emplace_back( node.first );
     }
@@ -27,49 +29,61 @@ bool sbp::algo::GraphCompressor::compress() {
         }
         count++;
     }
-    return false;
 }
 
-
+/**
+ * Seeks the top most node in a compressible chain of nodes
+ * @param current Starting point node
+ * @param previous_weight Weight of the current->child edge if known
+ * @return GraphIterator_t to the top node
+ */
 const sbp::algo::GraphCompressor::GraphIterator_t sbp::algo::GraphCompressor::seek( const GraphIterator_t &current,
                                                                                     const size_t &previous_weight ) const {
-    LOG_TRACE( "[sbp::algo::GraphCompressor::seek( ", current->first, ", ", previous_weight, " )] Seeking." );
     return seek( current, current, previous_weight );
 }
 
+/**
+ * Seeks the top most node in a compressible chain of nodes (helper function)
+ * @param previous Previous node sought
+ * @param current Current node
+ * @param previous_weight Weight of the current->previous edge if known
+ * @return GraphIterator_t to the top node of the chain
+ */
 const sbp::algo::GraphCompressor::GraphIterator_t sbp::algo::GraphCompressor::seek( const GraphIterator_t &previous,
                                                                                     const GraphIterator_t &current,
                                                                                     const size_t &previous_weight ) const {
     if( current->second.parentsList.empty() || current->second.parentsList.size() > 1 ) {
         return previous;
     }
-    if( current->second.childrenList.empty() ) {
-        return previous;
-    }
     if( current->second.childrenList.size() > 1 ) {
         return previous;
     }
-    auto downstream_weight = previous_weight;
-    if( downstream_weight == 0 ) {
-        downstream_weight = current->second.weight.at( current->second.childrenList.front() );
-    }
     auto parent = _in_graph.find( current->second.parentsList.front() );
-    if( parent->second.weight.at( current->first ) != downstream_weight ) {
-        return previous;
+    if( !current->second.childrenList.empty() ) {
+        auto downstream_weight = previous_weight;
+        if( downstream_weight == 0 ) {
+            downstream_weight = current->second.weight.at( current->second.childrenList.front() );
+        }
+        if( parent->second.weight.at( current->first ) != downstream_weight ) {
+            return previous;
+        } else {
+            //Parent is suitable for merging
+            return seek( current, parent, downstream_weight );
+        }
     } else {
-        //Parent is suitable for merging
-        LOG_TRACE( "[sbp::algo::GraphCompressor::seek( ", previous->first, ", ", current->first, ", ", downstream_weight, " )] "
-            "Seeking up..." );
-        return seek( current, parent, downstream_weight );
+        return seek( current, parent, 0 );
     }
 }
 
-
+/**
+ * Assesses compression possibility from a node and compresses the whole chain
+ * @param node Node to start from
+ * @return Number of nodes compressed
+ */
 size_t sbp::algo::GraphCompressor::compress( const GraphIterator_t &node ) {
     size_t count { 0 };
-    LOG_TRACE( "[sbp::algo::GraphCompressor::compress( ", node->first, " )] Looking to compress." );
     const GraphIterator_t start_node = seek( node, 0 ); //get to the top of the node chain that can be merged
-    LOG_TRACE( "[sbp::algo::GraphCompressor::compress( ", node->first, " )] Farthest upstream start point: '", start_node->first, "'." );
+    LOG_DEBUG( "[sbp::algo::GraphCompressor::compress( ", node->first, " )] Farthest upstream start point: '", start_node->first, "'." );
     if( start_node->second.childrenList.size() == 1 ) {
         std::queue<GraphIterator_t> merge_queue;
         bool valid_candidate { true };
@@ -84,27 +98,19 @@ size_t sbp::algo::GraphCompressor::compress( const GraphIterator_t &node ) {
                 current = next;
             }
         } while( !current->second.childrenList.empty() && valid_candidate );
-        LOG_DEBUG( "[sbp::algo::GraphCompressor::compress( ", start_node->first, " )] ", merge_queue.size(), " candidates found." );
         //Are there enough nodes to combine?
         if( merge_queue.size() > 1 ) {
-            LOG_TRACE( "[sbp::algo::GraphCompressor::compress( ", start_node->first, " )] Starting compression." );
+            LOG_DEBUG( "[sbp::algo::GraphCompressor::compress( ", start_node->first, " )] ", merge_queue.size() + 1, " candidates found in chain." );
             GraphIterator_t end_node  = merge_queue.back();
-            LOG_TRACE( "|- merging between '", start_node->first, "' and '", end_node->first, "'.");
             std::string merged_string  = start_node->first;
             while( merge_queue.size() > 1 ) {
-                LOG_TRACE( "Merging '" , merged_string, "' and '", merge_queue.front()->first, "'."  );
                 merged_string += merge_queue.front()->first.back(); //adding last letter
-                LOG_TRACE( "Merged string = " , merged_string );
-                LOG_TRACE( "Deleting '", merge_queue.front()->first, "' from graph and queue." );
                 _in_graph.deleteNode( merge_queue.front()->first );
                 merge_queue.pop();
                 count++;
             }
-            LOG_TRACE( "Merging '" , merged_string, "' and '", merge_queue.front()->first, "'."  );
             merged_string += merge_queue.front()->first.back(); //adding last letter
-            LOG_TRACE( "Merged string = " , merged_string );
             count++;
-
             //Creating new node for merged content
             _in_graph.addNode( merged_string );
             for( auto parent : start_node->second.parentsList ) {
@@ -115,18 +121,27 @@ size_t sbp::algo::GraphCompressor::compress( const GraphIterator_t &node ) {
                 auto out_weight = end_node->second.weight.at( child );
                 _in_graph.createDirectedEdge( merged_string, child, out_weight );
             }
-            LOG_DEBUG( "[sbp::algo::GraphCompressor::compress( ", start_node->first, " )] Compressed ", count, " nodes into 1." );
+            LOG_DEBUG( "[sbp::algo::GraphCompressor::compress( ", start_node->first, " )] "
+                "Compressed ", ( count > 0 ? count + 1 : count ), " nodes into 1." );
             //Deleting the old nodes
             _in_graph.deleteNode( end_node->first );
             merge_queue.pop();
             _in_graph.deleteNode( start_node->first );
-            _vector_of_kmers.emplace_back( merged_string );
+            //_vector_of_kmers.emplace_back( merged_string ); //overkill
+        } else {
+            LOG_DEBUG( "[sbp::algo::GraphCompressor::compress( ", start_node->first, " )] Node not in a compressible chain." );
         }
     }
+    return count;
 }
 
+/**
+ * Checks if a candidate node is good for compression
+ * @param candidate Node
+ * @param upstream_weight Weight from the previous edge
+ * @return Validation state
+ */
 bool sbp::algo::GraphCompressor::validateCandidate( const GraphIterator_t &candidate, const size_t &upstream_weight ) {
-    LOG_TRACE( "[sbp::algo::GraphCompressor::validateCandidate( ", candidate->first, ", ", upstream_weight, " )] Checking candidate." );
     return ( candidate->second.parentsList.size() == 1 &&
         ( ( candidate->second.childrenList.size() == 1 &&
             candidate->second.weight.at( candidate->second.childrenList.front() ) == upstream_weight )
