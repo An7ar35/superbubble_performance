@@ -47,6 +47,7 @@ namespace eadlib {
         const_iterator begin() const;
         const_iterator end() const;
         //Graph access
+        const_iterator find( const T &node ) const;
         const NodeAdjacency & at( const T &node ) const;
         //Graph manipulation
         bool createDirectedEdge( const T &from, const T &to );
@@ -56,7 +57,7 @@ namespace eadlib {
         bool deleteNode( const T &node );
         //Graph state
         bool isReachable( const T &from, const T &to ) const;
-        bool ndoeExists( const T &node ) const;
+        bool nodeExists( const T &node ) const;
         bool edgeExists( const T &from, const T &to ) const;
         bool isEmpty() const;
         size_t nodeCount() const;
@@ -69,8 +70,8 @@ namespace eadlib {
         std::ostream & printStats( std::ostream &out ) const;
       private:
         bool checkNodesExist( const T& from, const T &to ) const;
-        Graph_t m_adjacencyList;
-        size_t  m_edgeCount;
+        Graph_t _adjacencyList;
+        size_t  _edgeCount;
     };
 
     //-----------------------------------------------------------------------------------------------------------------
@@ -80,7 +81,7 @@ namespace eadlib {
      * Constructor (Default)
      */
     template<class T> Graph<T>::Graph() :
-        m_edgeCount( 0 )
+        _edgeCount( 0 )
     {}
 
     /**
@@ -88,10 +89,10 @@ namespace eadlib {
      * @param list Initializer_list of Node keys
      */
     template<class T> Graph<T>::Graph( std::initializer_list<T> list ) :
-        m_edgeCount( 0 )
+        _edgeCount( 0 )
     {
         for( typename std::initializer_list<T>::iterator it = list.begin(); it != list.end(); ++it ) {
-            m_adjacencyList.insert( typename Graph_t::value_type( *it, NodeAdjacency() ) );
+            _adjacencyList.insert( typename Graph_t::value_type( *it, NodeAdjacency() ) );
         }
     }
 
@@ -100,8 +101,8 @@ namespace eadlib {
      * @param graph Graph
      */
     template<class T> Graph<T>::Graph( const Graph<T> &graph ) :
-        m_edgeCount( graph.m_edgeCount ),
-        m_adjacencyList( graph.m_adjacencyList )
+        _edgeCount( graph._edgeCount ),
+        _adjacencyList( graph._adjacencyList )
     {}
 
     /**
@@ -109,8 +110,8 @@ namespace eadlib {
      * @param graph Graph
      */
     template<class T> Graph<T>::Graph( Graph<T> &&graph ) :
-        m_edgeCount( graph.m_edgeCount ),
-        m_adjacencyList( graph.m_adjacencyList )
+        _edgeCount( graph._edgeCount ),
+        _adjacencyList( graph._adjacencyList )
     {}
 
 
@@ -119,7 +120,7 @@ namespace eadlib {
      * @return begin() iterator to the Graph's adjacency list
      */
     template<class T> typename Graph<T>::const_iterator Graph<T>::begin() const{
-        return m_adjacencyList.cbegin();
+        return _adjacencyList.cbegin();
     }
 
     /**
@@ -127,7 +128,16 @@ namespace eadlib {
      * @return end() iterator to the Graph's adjacency list
      */
     template<class T> typename Graph<T>::const_iterator Graph<T>::end() const {
-        return m_adjacencyList.cend();
+        return _adjacencyList.cend();
+    }
+
+    /**
+     * Finds node in graph
+     * @param node Node to look up in the graph
+     * @return Const iterator to the Adjacency lists of the node
+     */
+    template<class T> typename Graph<T>::const_iterator Graph<T>::find( const T &node ) const {
+       return _adjacencyList.find( node );
     }
 
     /**
@@ -138,7 +148,7 @@ namespace eadlib {
      */
     template<class T> const typename Graph<T>::NodeAdjacency & Graph<T>::at( const T &node ) const {
         try {
-            return m_adjacencyList.at( node );
+            return _adjacencyList.at( node );
         } catch( std::out_of_range ) {
             LOG_ERROR( "[eadlib::Graph<T>::at( ", node, " )] Node is not in graph." );
             throw std::out_of_range( "[eadlib::Graph<T>::at(..)] Node is not in graph." );
@@ -158,27 +168,27 @@ namespace eadlib {
             LOG_ERROR( "[eadlib::Graph<T>::createDirectedEdge( ", from, ", ", to, " )] Node(s) missing in graph." );
             return false;
         }
-        if( m_edgeCount == std::numeric_limits<size_t>::max() ) {
+        if( _edgeCount == std::numeric_limits<size_t>::max() ) {
             LOG_FATAL( "[eadlib::Graph<T>::createDirectedEdge( ", from, ", ", to, " )] Edge count == size_t type limit. Nothing done." );
             throw std::overflow_error( "Total edge weight has reached the limit of size_t type." );
         }
         //Edge creation
-        auto search_to = std::find( m_adjacencyList.at( from ).childrenList.begin(),
-                                    m_adjacencyList.at( from ).childrenList.end(),
+        auto search_to = std::find( _adjacencyList.at( from ).childrenList.begin(),
+                                    _adjacencyList.at( from ).childrenList.end(),
                                     to );
-        if( search_to != m_adjacencyList.at( from ).childrenList.end() ) {
+        if( search_to != _adjacencyList.at( from ).childrenList.end() ) {
             LOG_WARNING( "[eadlib::Graph<T>::createDirectedEdge( ", from, ", ", to, " )] An existing child edge was found at '", from, "'." );
         } else {
-            m_adjacencyList.at( from ).childrenList.emplace_back( to );
-            m_edgeCount++;
+            _adjacencyList.at( from ).childrenList.emplace_back( to );
+            _edgeCount++;
         }
-        auto search_from = std::find( m_adjacencyList.at( to ).parentsList.begin(),
-                                      m_adjacencyList.at( to ).parentsList.end(),
+        auto search_from = std::find( _adjacencyList.at( to ).parentsList.begin(),
+                                      _adjacencyList.at( to ).parentsList.end(),
                                       from );
-        if( search_from != m_adjacencyList.at( to ).parentsList.end() ) {
+        if( search_from != _adjacencyList.at( to ).parentsList.end() ) {
             LOG_WARNING( "[eadlib::Graph<T>::createDirectedEdge( ", from, ", ", to, " )] An existing parent edge was found at '", to, "'." );
         } else {
-            m_adjacencyList.at( to ).parentsList.emplace_back( from );
+            _adjacencyList.at( to ).parentsList.emplace_back( from );
         }
         return true;
     }
@@ -192,30 +202,30 @@ namespace eadlib {
      */
     template<class T> bool Graph<T>::createDirectedEdge_fast( const T &from, const T &to ) {
         //Error control
-        if( m_edgeCount == std::numeric_limits<size_t>::max() ) {
+        if( _edgeCount == std::numeric_limits<size_t>::max() ) {
             LOG_FATAL( "[eadlib::Graph<T>::createDirectedEdge( ", from, ", ", to, " )] Edge count == size_t type limit. Nothing done." );
             throw std::overflow_error( "Total edge weight has reached the limit of size_t type." );
         }
         //Node creation if missing
-        m_adjacencyList.insert( typename Graph_t::value_type( from, NodeAdjacency() ) );
-        m_adjacencyList.insert( typename Graph_t::value_type( to, NodeAdjacency() ) );
+        _adjacencyList.insert( typename Graph_t::value_type( from, NodeAdjacency() ) );
+        _adjacencyList.insert( typename Graph_t::value_type( to, NodeAdjacency() ) );
         //Edge creation
-        auto search_to = std::find( m_adjacencyList.at( from ).childrenList.begin(),
-                                    m_adjacencyList.at( from ).childrenList.end(),
+        auto search_to = std::find( _adjacencyList.at( from ).childrenList.begin(),
+                                    _adjacencyList.at( from ).childrenList.end(),
                                     to );
-        if( search_to != m_adjacencyList.at( from ).childrenList.end() ) {
+        if( search_to != _adjacencyList.at( from ).childrenList.end() ) {
             LOG_WARNING( "[eadlib::Graph<T>::createDirectedEdge( ", from, ", ", to, " )] An existing child edge was found at '", from, "'." );
         } else {
-            m_adjacencyList.at( from ).childrenList.emplace_back( to );
-            m_edgeCount++;
+            _adjacencyList.at( from ).childrenList.emplace_back( to );
+            _edgeCount++;
         }
-        auto search_from = std::find( m_adjacencyList.at( to ).parentsList.begin(),
-                                      m_adjacencyList.at( to ).parentsList.end(),
+        auto search_from = std::find( _adjacencyList.at( to ).parentsList.begin(),
+                                      _adjacencyList.at( to ).parentsList.end(),
                                       from );
-        if( search_from != m_adjacencyList.at( to ).parentsList.end() ) {
+        if( search_from != _adjacencyList.at( to ).parentsList.end() ) {
             LOG_WARNING( "[eadlib::Graph<T>::createDirectedEdge( ", from, ", ", to, " )] An existing parent edge was found at '", to, "'." );
         } else {
-            m_adjacencyList.at( to ).parentsList.emplace_back( from );
+            _adjacencyList.at( to ).parentsList.emplace_back( from );
         }
         return true;
     }
@@ -232,24 +242,24 @@ namespace eadlib {
             LOG_ERROR( "[eadlib::Graph<T>::deleteDirectedEdge( ", from, ", ", to, " )] Node(s) missing in graph." );
             return false;
         }
-        auto search_to = std::find( m_adjacencyList.at( from ).childrenList.begin(),
-                                    m_adjacencyList.at( from ).childrenList.end(),
+        auto search_to = std::find( _adjacencyList.at( from ).childrenList.begin(),
+                                    _adjacencyList.at( from ).childrenList.end(),
                                     to );
-        if( search_to ==  m_adjacencyList.at( from ).childrenList.end() ) {
+        if( search_to ==  _adjacencyList.at( from ).childrenList.end() ) {
             LOG_ERROR( "[eadlib::Graph<T>::deleteDirectedEdge( ", from, ", ", to, " )] Destination node '", to, "' not found in list of children." );
             return false;
         }
-        auto search_from = std::find( m_adjacencyList.at( to ).parentsList.begin(),
-                                      m_adjacencyList.at( to ).parentsList.end(),
+        auto search_from = std::find( _adjacencyList.at( to ).parentsList.begin(),
+                                      _adjacencyList.at( to ).parentsList.end(),
                                       from );
-        if( search_from == m_adjacencyList.at( to ).parentsList.end() ) {
+        if( search_from == _adjacencyList.at( to ).parentsList.end() ) {
             LOG_ERROR( "[eadlib::Graph<T>::deleteDirectedEdge( ", from, ", ", to, " )] Origin node '", from, "' not found in list of parents." );
             return false;
         }
         //Edge deletion
-        m_adjacencyList.at( from ).childrenList.erase( search_to );
-        m_adjacencyList.at( to ).parentsList.erase( search_from );
-        m_edgeCount--;
+        _adjacencyList.at( from ).childrenList.erase( search_to );
+        _adjacencyList.at( to ).parentsList.erase( search_from );
+        _edgeCount--;
         return true;
     }
 
@@ -259,8 +269,8 @@ namespace eadlib {
      * @param Success
      */
     template<class T> bool Graph<T>::addNode( const T &node ) {
-        if( m_adjacencyList.find( node ) == m_adjacencyList.end() ) {
-            m_adjacencyList.insert( typename Graph_t::value_type( node, NodeAdjacency() ) );
+        if( _adjacencyList.find( node ) == _adjacencyList.end() ) {
+            _adjacencyList.insert( typename Graph_t::value_type( node, NodeAdjacency() ) );
             return true;
         } else {
             LOG_ERROR( "[eadlib::Graph<T>::addNode( ", node, " )] Node is already in graph." );
@@ -274,15 +284,15 @@ namespace eadlib {
      * @return Success
      */
     template<class T> bool Graph<T>::deleteNode( const T &node ) {
-        if( m_adjacencyList.find( node ) == m_adjacencyList.end() ) {
+        if( _adjacencyList.find( node ) == _adjacencyList.end() ) {
             LOG_WARNING( "[eadlib::Graph<T>::deleteNode( ", node, " )] Node doesn't exist." );
             return false;
         } else {
-            for ( auto node_it = m_adjacencyList.begin(); node_it != m_adjacencyList.end(); ++node_it ) {
+            for ( auto node_it = _adjacencyList.begin(); node_it != _adjacencyList.end(); ++node_it ) {
                 for( auto child_it = node_it->second.childrenList.begin(); child_it != node_it->second.childrenList.end(); ) {
                     if( *child_it == node ) {
                         child_it = node_it->second.childrenList.erase( child_it );
-                        m_edgeCount--;
+                        _edgeCount--;
                     } else {
                         ++child_it;
                     }
@@ -296,7 +306,8 @@ namespace eadlib {
                     }
                 }
             }
-            m_adjacencyList.erase( node );
+            _edgeCount -= _adjacencyList.at( node ).childrenList.size();
+            _adjacencyList.erase( node );
             return true;
         }
     }
@@ -310,14 +321,14 @@ namespace eadlib {
      */
     template<class T> bool Graph<T>::isReachable( const T &from, const T &to ) const {
         if( from == to ) return true;
-        auto search_from = m_adjacencyList.find( from );
-        auto search_to   = m_adjacencyList.find( to );
+        auto search_from = _adjacencyList.find( from );
+        auto search_to   = _adjacencyList.find( to );
         //Error control
-        if( search_from == m_adjacencyList.end() ) {
+        if( search_from == _adjacencyList.end() ) {
             LOG_ERROR( "[eadlib::Graph<T>::isReachable( ", from, ", ", to, ")] '", from, "' node does not exist in graph.");
             return false;
         }
-        if( search_to == m_adjacencyList.end() ) {
+        if( search_to == _adjacencyList.end() ) {
             LOG_ERROR( "[eadlib::Graph<T>::isReachable( ", from, ", ", to, ")] '", to, "' node does not exist in graph.");
             return false;
         }
@@ -326,7 +337,7 @@ namespace eadlib {
             return false;
         }
         std::unordered_map<T, bool> visited;
-        for( typename Graph_t::const_iterator it = m_adjacencyList.cbegin(); it != m_adjacencyList.cend(); ++it ) {
+        for( typename Graph_t::const_iterator it = _adjacencyList.cbegin(); it != _adjacencyList.cend(); ++it ) {
             visited.emplace( it->first, false );
         }
         std::list<T> queue;
@@ -334,8 +345,8 @@ namespace eadlib {
         while( !queue.empty() ) {
             T s = queue.front();
             queue.pop_front();
-            auto search_node = m_adjacencyList.find( s );
-            if( search_node == m_adjacencyList.end() ) {
+            auto search_node = _adjacencyList.find( s );
+            if( search_node == _adjacencyList.end() ) {
                 LOG_ERROR( "[eadlib::Graph<T>::isReachable( ", from, ", ", to, " )] Node '", s, "' does not exist, yet has a directed edge pointing to it." );
                 throw new eadlib::exception::corruption( "[eadlib::Graph<T>::isReachable(..)] A directed edge points to a non-existent node." );
             }
@@ -356,11 +367,11 @@ namespace eadlib {
      * @return Node existence
      */
     template<class T> bool Graph<T>::nodeExists( const T &node ) const {
-        if( m_adjacencyList.empty() ) {
+        if( _adjacencyList.empty() ) {
             LOG_ERROR( "[eadlib::Graph<T>::nodeExists()( ", node, " )] No nodes in graph." );
             return false;
         }
-        return m_adjacencyList.find( node ) != m_adjacencyList.cend();
+        return _adjacencyList.find( node ) != _adjacencyList.cend();
     }
 
     /**
@@ -370,22 +381,22 @@ namespace eadlib {
      * @return Edge existence
      */
     template<class T> bool Graph<T>::edgeExists( const T &from, const T &to ) const {
-        if( m_adjacencyList.empty() ) {
+        if( _adjacencyList.empty() ) {
             LOG_ERROR( "[eadlib::Graph<T>::edgeExists()( ", from, ", ", to, " )] No nodes in graph." );
             return false;
         }
-        if( m_adjacencyList.find( from ) == m_adjacencyList.cend() ) {
+        if( _adjacencyList.find( from ) == _adjacencyList.cend() ) {
             LOG_ERROR( "[eadlib::Graph<T>::edgeExists()( ", from, ", ", to, " )] Origin node '", from, "' not found." );
             return false;
         }
-        if( m_adjacencyList.find( to ) == m_adjacencyList.cend() ) {
+        if( _adjacencyList.find( to ) == _adjacencyList.cend() ) {
             LOG_ERROR( "[eadlib::Graph<T>::edgeExists()( ", from, ", ", to, " )] Destination node '", to, "' not found." );
             return false;
         }
-        auto find_result = std::find( m_adjacencyList.at( from ).childrenList.cbegin(),
-                                      m_adjacencyList.at( from ).childrenList.cend(),
+        auto find_result = std::find( _adjacencyList.at( from ).childrenList.cbegin(),
+                                      _adjacencyList.at( from ).childrenList.cend(),
                                       to );
-        return find_result != m_adjacencyList.at( from ).childrenList.cend();
+        return find_result != _adjacencyList.at( from ).childrenList.cend();
     }
 
     /**
@@ -393,7 +404,7 @@ namespace eadlib {
      * @return Empty state
      */
     template<class T> bool Graph<T>::isEmpty() const {
-        return m_adjacencyList.empty();
+        return _adjacencyList.empty();
     }
 
     /**
@@ -401,7 +412,7 @@ namespace eadlib {
      * @return Number of nodes
      */
     template<class T> size_t Graph<T>::nodeCount() const {
-        return m_adjacencyList.size();
+        return _adjacencyList.size();
     }
 
     /**
@@ -409,7 +420,7 @@ namespace eadlib {
      * @return Number of edges (links between the nodes)
      */
     template<class T> size_t Graph<T>::size() const {
-        return m_edgeCount;
+        return _edgeCount;
     }
 
     /**
@@ -418,11 +429,11 @@ namespace eadlib {
      * @return In degree of the node
      */
     template<class T> size_t Graph<T>::getInDegree( const T &node ) const {
-        if( m_adjacencyList.find( node ) == m_adjacencyList.end() ) {
+        if( _adjacencyList.find( node ) == _adjacencyList.end() ) {
             LOG_ERROR( "[eadlib::Graph<T>::getInDegree( ", node, " )] Node not found in graph." );
             return 0;
         }
-        return m_adjacencyList.at( node ).parentsList.size();
+        return _adjacencyList.at( node ).parentsList.size();
     }
 
     /**
@@ -431,11 +442,11 @@ namespace eadlib {
      * @return Out degree of the node
      */
     template<class T> size_t Graph<T>::getOutDegree( const T &node ) const {
-        if( m_adjacencyList.find( node ) == m_adjacencyList.end() ) {
+        if( _adjacencyList.find( node ) == _adjacencyList.end() ) {
             LOG_ERROR( "[eadlib::Graph<T>::getOutDegree( ", node, " )] Node not found in graph." );
             return 0;
         }
-        return m_adjacencyList.at( node ).childrenList.size();
+        return _adjacencyList.at( node ).childrenList.size();
     }
 
     /**
@@ -443,12 +454,12 @@ namespace eadlib {
      * @return Output string stream of adjacency list
      */
     template<class T> std::ostream & Graph<T>::printAdjacencyList( std::ostream &out ) const {
-        for( typename Graph_t::const_iterator it = m_adjacencyList.cbegin(); it != m_adjacencyList.cend(); ++it ) {
+        for( typename Graph_t::const_iterator it = _adjacencyList.cbegin(); it != _adjacencyList.cend(); ++it ) {
             out << "[" << it->first << "] -> ";
             for( T node : it->second.childrenList ) {
                 out << "[" << node << "] ";
             }
-            if( it != m_adjacencyList.cend()) out << "\n";
+            if( it != _adjacencyList.cend()) out << "\n";
         }
         return out;
     }
@@ -458,9 +469,9 @@ namespace eadlib {
      * @return Output string stream list of Nodes
      */
     template<class T> std::ostream & Graph<T>::printGraphNodes( std::ostream &out ) const {
-        for( typename Graph_t::const_iterator it = m_adjacencyList.cbegin(); it != m_adjacencyList.cend(); ++it ) {
+        for( typename Graph_t::const_iterator it = _adjacencyList.cbegin(); it != _adjacencyList.cend(); ++it ) {
             out << it->first;
-            if( it != m_adjacencyList.cend() ) out << "\n";
+            if( it != _adjacencyList.cend() ) out << "\n";
         }
         return out;
     }
@@ -482,15 +493,15 @@ namespace eadlib {
      * @return Existence state
      */
     template<class T> bool Graph<T>::checkNodesExist( const T &from, const T &to ) const {
-        if( m_adjacencyList.empty() ) {
+        if( _adjacencyList.empty() ) {
             LOG_ERROR( "[eadlib::Graph<T>::checkNodesExist( ", from, ", ", to, " )] Graph is empty." );
             return false;
         }
-        if( m_adjacencyList.find( from ) == m_adjacencyList.end() ) {
+        if( _adjacencyList.find( from ) == _adjacencyList.end() ) {
             LOG_ERROR( "[eadlib::Graph<T>::checkNodesExist( ", from, ", ", to, " )] '", from, "' node not found." );
             return false;
         }
-        if( m_adjacencyList.find( to ) == m_adjacencyList.end() ) {
+        if( _adjacencyList.find( to ) == _adjacencyList.end() ) {
             LOG_ERROR( "[eadlib::Graph<T>::checkNodesExist( ", from, ", ", to, " )] '", to, "' node not found." );
             return false;
         }
