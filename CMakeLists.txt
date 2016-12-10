@@ -10,6 +10,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build/")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build/")
 
 include_directories(include)
+include_directories(external)
 
 set(SOURCE_FILES
         src/main.cpp
@@ -25,11 +26,12 @@ set(SOURCE_FILES
         src/algorithm/EulerWalk.h
         src/algorithm/Comparator.cpp
         src/algorithm/Comparator.h
-        src/io/Database.cpp src/io/Database.h)
+        src/io/Database.cpp
+        src/io/Database.h)
 
 set(SQLITE3_FILES
-        include/sqlite3/sqlite3.h
-        include/sqlite3/sqlite3.c)
+        external/sqlite3/sqlite3.h
+        external/sqlite3/sqlite3.c)
 
 
 add_library(sqlite3 ${SQLITE3_FILES})
@@ -42,7 +44,9 @@ SET_TARGET_PROPERTIES(sqlite3 PROPERTIES LINKER_LANGUAGE CXX)
 TARGET_LINK_LIBRARIES(sqlite3 dl)
 TARGET_LINK_LIBRARIES(sbp sqlite3)
 
-#// GTest framework for unit testing
+####################################
+# GTest framework for unit testing #
+####################################
 enable_testing()
 find_package(GTest QUIET)
 
