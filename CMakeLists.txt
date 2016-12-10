@@ -15,12 +15,8 @@ set(SOURCE_FILES
         src/main.cpp
         src/io/FastaParser.cpp
         src/io/FastaParser.h
-        src/io/GraphParser.cpp
-        src/io/GraphParser.h
         src/io/DotExport.cpp
         src/io/DotExport.h
-        src/io/GraphExport.cpp
-        src/io/GraphExport.h
         src/graph/GraphConstructor.cpp
         src/graph/GraphConstructor.h
         src/algorithm/GraphCompressor.cpp
@@ -28,9 +24,23 @@ set(SOURCE_FILES
         src/algorithm/EulerWalk.cpp
         src/algorithm/EulerWalk.h
         src/algorithm/Comparator.cpp
-        src/algorithm/Comparator.h)
+        src/algorithm/Comparator.h
+        src/io/Database.cpp src/io/Database.h)
+
+set(SQLITE3_FILES
+        include/sqlite3/sqlite3.h
+        include/sqlite3/sqlite3.c)
+
+
+add_library(sqlite3 ${SQLITE3_FILES})
 
 add_executable(sbp ${SOURCE_FILES})
+
+SET_TARGET_PROPERTIES(sbp PROPERTIES LINKER_LANGUAGE CXX)
+SET_TARGET_PROPERTIES(sqlite3 PROPERTIES LINKER_LANGUAGE CXX)
+
+TARGET_LINK_LIBRARIES(sqlite3 dl)
+TARGET_LINK_LIBRARIES(sbp sqlite3)
 
 #// GTest framework for unit testing
 enable_testing()
