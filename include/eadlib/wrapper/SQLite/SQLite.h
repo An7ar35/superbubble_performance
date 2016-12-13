@@ -83,7 +83,7 @@ namespace eadlib {
          * @param rhs SQLite instance to move over
          * @return Moved instance
          */
-        SQLite & SQLite::operator =( SQLite &&rhs ) noexcept {
+        inline SQLite & SQLite::operator =( SQLite &&rhs ) noexcept {
             _connected_flag = rhs._connected_flag;
             _database = rhs._database;
             return *this;
@@ -156,7 +156,7 @@ namespace eadlib {
          * @param table TableDB to store the metadata into
          * @return Success
          */
-        bool SQLite::pullMetaData( const std::string &table_name, TableDB &table ) {
+        inline bool SQLite::pullMetaData( const std::string &table_name, TableDB &table ) {
             if( !connected() ) {
                 LOG_ERROR( "[eadlib::wrapper::SQLite::pullMetaData( '", table_name, "', <TableDB> )] Database file not opened." );
                 return false;
@@ -196,7 +196,7 @@ namespace eadlib {
          * @throws std::invalid_argument when an unsupported type (Blob) from the database is encountered
          * @throws std::runtime_error when there is a problem adding data to the TableDB
          */
-        size_t SQLite::queryPull( const std::string &query, TableDB &table ) {
+        inline size_t SQLite::queryPull( const std::string &query, TableDB &table ) {
             size_t row_counter { 0 };
             sqlite3_stmt *statement { };
             sqlMsgCode( sqlite3_prepare( _database, query.c_str(), -1, &statement, NULL ), query );
@@ -300,8 +300,7 @@ namespace eadlib {
          * @return Problem state (0 = no problems)
          */
         inline bool SQLite::sqlMsgCode( int code ) {
-            std::string s = "";
-            return sqlMsgCode( code, s );
+            return sqlMsgCode( code, "" );
         }
 
         /**
@@ -315,225 +314,102 @@ namespace eadlib {
          * @return Problem state (0 = no problems)
          */
         inline bool SQLite::sqlMsgCode( int code, const std::string &query ) {
-            std::ostringstream oss;
             switch( code ) {
                 case SQLITE_OK: /* Successful result */
-                    oss << "SQLite: OK";
-                    if( query.size() > 0 ) {
-                        oss << "\n     Query: " << query;
-                    }
-                    LOG_TRACE( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] ", oss.str() );
+                    LOG_TRACE( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] SQLITE OK: ", query );
                     return 0;
                 case SQLITE_ERROR: /* SQL error or missing database */
-                    oss << "SQL error or missing database.";
-                    if( query.size() > 0 ) {
-                        oss << "\n     Query: " << query;
-                    }
-                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] ", oss.str() );
+                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] SQL error or missing database: ", query );
                     return 1;
                 case SQLITE_INTERNAL: /* Internal logic error in SQLite */
-                    oss << "Internal logic error in SQLite";
-                    if( query.size() > 0 ) {
-                        oss << "\n     Query: " << query;
-                    }
-                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] ", oss.str() );
+                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] Internal logic error in SQLite: ", query );
                     return 1;
                 case SQLITE_PERM: /* Access permission denied */
-                    oss << "Access permission denied";
-                    if( query.size() > 0 ) {
-                        oss << "\n     Query: " << query;
-                    }
-                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] ", oss.str() );
+                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] Access permission denied: ", query );
                     return 1;
                 case SQLITE_ABORT: /* Callback routine requested an abort */
-                    oss << "Callback routine requested an abort";
-                    if( query.size() > 0 ) {
-                        oss << "\n     Query: " << query;
-                    }
-                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] ", oss.str() );
+                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] Callback routine requested an abort: ", query );
                     return 1;
                 case SQLITE_BUSY: /* The database file is locked */
-                    oss << "The database file is locked";
-                    if( query.size() > 0 ) {
-                        oss << "\n     Query: " << query;
-                    }
-                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] ", oss.str() );
+                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] The database file is locked: ", query );
                     return 1;
                 case SQLITE_LOCKED: /* A table in the database is locked */
-                    oss << "A table in the database is locked";
-                    if( query.size() > 0 ) {
-                        oss << "\n     Query: " << query;
-                    }
-                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] ", oss.str() );
+                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] A table in the database is locked: ", query );
                     return 1;
                 case SQLITE_NOMEM: /* A malloc() failed */
-                    oss << "A malloc() failed";
-                    if( query.size() > 0 ) {
-                        oss << "\n     Query: " << query;
-                    }
-                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] ", oss.str() );
+                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] A malloc() failed: ", query );
                     return 1;
                 case SQLITE_READONLY: /* Attempt to write a readonly database */
-                    oss << "Attempt to write a readonly database";
-                    if( query.size() > 0 ) {
-                        oss << "\n     Query: " << query;
-                    }
-                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] ", oss.str() );
+                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] Attempt to write a readonly database: ", query );
                     return 1;
                 case SQLITE_INTERRUPT: /* Operation terminated by sqlite3_interrupt()*/
-                    oss << "Operation terminated by sqlite3_interrupt()";
-                    if( query.size() > 0 ) {
-                        oss << "\n     Query: " << query;
-                    }
-                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] ", oss.str() );
+                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] Operation terminated by sqlite3_interrupt(): ", query );
                     return 1;
                 case SQLITE_IOERR: /* Some kind of disk I/O error occurred */
-                    oss << "Some kind of disk I/O error occurred";
-                    if( query.size() > 0 ) {
-                        oss << "\n     Query: " << query;
-                    }
-                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] ", oss.str() );
+                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] Some kind of disk I/O error occurred: ", query );
                     return 1;
                 case SQLITE_CORRUPT: /* The database disk image is malformed */
-                    oss << "The database disk image is malformed";
-                    if( query.size() > 0 ) {
-                        oss << "\n     Query: " << query;
-                    }
-                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] ", oss.str() );
+                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] The database disk image is malformed: ", query );
                     return 1;
                 case SQLITE_NOTFOUND: /* Unknown opcode in sqlite3_file_control() */
-                    oss << "Unknown opcode in sqlite3_file_control()";
-                    if( query.size() > 0 ) {
-                        oss << "\n     Query: " << query;
-                    }
-                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] ", oss.str() );
+                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] Unknown opcode in sqlite3_file_control(): ", query );
                     return 1;
                 case SQLITE_FULL: /* Insertion failed because database is full */
-                    oss << "Insertion failed because database is full";
-                    if( query.size() > 0 ) {
-                        oss << "\n     Query: " << query;
-                    }
-                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] ", oss.str() );
+                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] Insertion failed because database is full: ", query );
                     return 1;
                 case SQLITE_CANTOPEN: /* Unable to open the database file */
-                    oss << "Unable to open the database file";
-                    if( query.size() > 0 ) {
-                        oss << "\n     Query: " << query;
-                    }
-                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] ", oss.str() );
+                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] Unable to open the database file: ", query );
                     return 1;
                 case SQLITE_PROTOCOL: /* Database lock protocol error */
-                    oss << "Database lock protocol error";
-                    if( query.size() > 0 ) {
-                        oss << "\n     Query: " << query;
-                    }
-                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] ", oss.str() );
+                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] Database lock protocol error: ", query );
                     return 1;
                 case SQLITE_EMPTY: /* Database is empty */
-                    oss << "Database is empty";
-                    if( query.size() > 0 ) {
-                        oss << "\n     Query: " << query;
-                    }
-                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] ", oss.str() );
+                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] Database is empty: ", query );
                     return 1;
                 case SQLITE_SCHEMA: /* The database schema changed */
-                    oss << "The database schema changed";
-                    if( query.size() > 0 ) {
-                        oss << "\n     Query: " << query;
-                    }
-                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] ", oss.str() );
+                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] The database schema changed: ", query );
                     return 1;
                 case SQLITE_TOOBIG: /* String or BLOB exceeds size limit */
-                    oss << "String or BLOB exceeds size limit";
-                    if( query.size() > 0 ) {
-                        oss << "\n     Query: " << query;
-                    }
-                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] ", oss.str() );
+                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] String or BLOB exceeds size limit: ", query );
                     return 1;
                 case SQLITE_CONSTRAINT: /* Abort due to constraint violation */
-                    oss << "Abort due to constraint violation";
-                    if( query.size() > 0 ) {
-                        oss << "\n     Query: " << query;
-                    }
-                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] ", oss.str() );
+                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] Abort due to constraint violation: ", query );
                     return 1;
                 case SQLITE_MISMATCH: /* Data type mismatch */
-                    oss << "Data type mismatch";
-                    if( query.size() > 0 ) {
-                        oss << "\n     Query: " << query;
-                    }
-                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] ", oss.str() );
+                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] Data type mismatch: ", query );
                     return 1;
                 case SQLITE_MISUSE: /* Library used incorrectly */
-                    oss << "Library used incorrectly";
-                    if( query.size() > 0 ) {
-                        oss << "\n     Query: " << query;
-                    }
-                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] ", oss.str() );
+                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] Library used incorrectly: ", query );
                     return 1;
                 case SQLITE_NOLFS: /* Uses OS features not supported on host */
-                    oss << "Uses OS features not supported on host";
-                    if( query.size() > 0 ) {
-                        oss << "\n     Query: " << query;
-                    }
-                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] ", oss.str() );
+                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] Uses OS features not supported on host: ", query );
                     return 1;
                 case SQLITE_AUTH: /* Authorisation denied */
-                    oss << "Authorisation denied";
-                    if( query.size() > 0 ) {
-                        oss << "\n     Query: " << query;
-                    }
-                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] ", oss.str() );
+                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] Authorisation denied: ", query );
                     return 1;
                 case SQLITE_FORMAT: /* Auxiliary database format error */
-                    oss << "Auxiliary database format error";
-                    if( query.size() > 0 ) {
-                        oss << "\n     Query: " << query;
-                    }
-                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] ", oss.str() );
+                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] Auxiliary database format error: ", query );
                     return 1;
                 case SQLITE_RANGE: /* 2nd parameter to sqlite3_bind out of range */
-                    oss << "2nd parameter to sqlite3_bind out of range";
-                    if( query.size() > 0 ) {
-                        oss << "\n     Query: " << query;
-                    }
-                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] ", oss.str() );
+                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] 2nd parameter to sqlite3_bind out of range: ", query );
                     return 1;
                 case SQLITE_NOTADB: /* File opened that is not a database file */
-                    oss << "File opened that is not a database file";
-                    if( query.size() > 0 ) {
-                        oss << "\n     Query: " << query;
-                    }
-                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] ", oss.str() );
+                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] File opened that is not a database file: ", query );
                     return 1;
                 case SQLITE_NOTICE: /* Notifications from sqlite3_log() */
-                    oss << "Notifications from sqlite3_log()";
-                    if( query.size() > 0 ) {
-                        oss << "\n     Query: " << query;
-                    }
-                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] ", oss.str() );
+                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] Notifications from sqlite3_log(): ", query );
                     return 1;
                 case SQLITE_WARNING: /* Warnings from sqlite3_log() */
-                    oss << "Warnings from sqlite3_log()";
-                    if( query.size() > 0 ) {
-                        oss << "\n     Query: " << query;
-                    }
-                    LOG_DEBUG( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] ", oss.str() );
+                    LOG_DEBUG( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] Warnings from sqlite3_log(): ", query );
                     return 1;
                 case SQLITE_ROW: /* sqlite3_step() has another row ready */
-                    oss << "sqlite3_step() has another row ready";
-                    LOG_DEBUG( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] ", oss.str() );
+                    LOG_DEBUG( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] sqlite3_step() has another row ready." );
                     return 0;
                 case SQLITE_DONE: /* sqlite3_step() has finished executing */
-                    oss << "sqlite3_step() has finished executing";
-                    if( query.size() > 0 ) {
-                        oss << "\n     Query: " << query;
-                    }
-                    LOG_DEBUG( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] ", oss.str() );
+                    LOG_DEBUG( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] sqlite3_step() has finished executing: ", query );
                     return 0;
                 default:
-                    oss << "Weird unrecognised SQlite3 error code: " << code;
-                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] ", oss.str() );
+                    LOG_ERROR( "[eadlib::wrapper::SQLite::sqlMsgCode( ", code, " )] Unrecognised SQlite3 error code." );
                     return 1;
             }
         }

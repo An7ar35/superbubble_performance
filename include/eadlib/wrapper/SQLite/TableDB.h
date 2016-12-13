@@ -550,7 +550,7 @@ namespace eadlib {
         _integrity_flag = false;
         //check data table
         size_t base_height = _rows.size();
-        size_t base_width  = _rows.at( 0 ).getLength();
+        size_t base_width  = _columns.size(); //_rows.at( 0 ).getLength();
         //Column(s) exist
         if( getColCount() < 1 ) {
             LOG_ERROR( "[eadlib::TableDB::checkBorders()] Table has no Columns." );
@@ -594,7 +594,7 @@ namespace eadlib {
      * @param item2 Value 2
      * @return Pair with the row reached with the first match and a find success flag
      */
-    std::pair<size_t, bool> TableDB::searchFor( const std::string &column1, const TableDBCell &item1,
+    inline std::pair<size_t, bool> TableDB::searchFor( const std::string &column1, const TableDBCell &item1,
                                                 const std::string &column2, const TableDBCell &item2 ) { //order doesn't matter
         auto col_index1 = findColumn( column1 );
         auto col_index2 = findColumn( column2 );
