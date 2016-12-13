@@ -16,7 +16,6 @@ set(SOURCE_FILES
         src/main.cpp
         src/io/FastaParser.cpp
         src/io/FastaParser.h
-        src/io/DotExport.cpp
         src/io/DotExport.h
         src/graph/GraphConstructor.cpp
         src/graph/GraphConstructor.h
@@ -27,7 +26,7 @@ set(SOURCE_FILES
         src/algorithm/Comparator.cpp
         src/algorithm/Comparator.h
         src/io/Database.cpp
-        src/io/Database.h)
+        src/io/Database.h src/graph/GraphIndexer.cpp src/graph/GraphIndexer.h)
 
 set(SQLITE3_FILES
         external/sqlite3/sqlite3.h
