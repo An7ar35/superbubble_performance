@@ -29,6 +29,7 @@ namespace eadlib {
             SQLite & operator =( const SQLite &rhs ) = delete;
             SQLite & operator =( SQLite &&rhs ) noexcept;
             bool open( const std::string &file_name );
+            std::string getFileName() const;
             bool close();
             bool connected() const;
             size_t pull( const std::string &query, TableDB &table );
@@ -38,6 +39,7 @@ namespace eadlib {
             //Variables
             bool _connected_flag;
             sqlite3 * _database;
+            std::string _file_name;
             //Methods
             bool connect( const std::string &file_name );
             bool disconnect();
@@ -57,7 +59,8 @@ namespace eadlib {
          */
         inline SQLite::SQLite() :
             _connected_flag( false ),
-            _database( nullptr )
+            _database( nullptr ),
+            _file_name( "" )
         {}
 
         /**
@@ -66,7 +69,8 @@ namespace eadlib {
          */
         inline SQLite::SQLite( SQLite &&sqlite ) noexcept :
             _connected_flag( sqlite._connected_flag ),
-            _database( sqlite._database )
+            _database( sqlite._database ),
+            _file_name( sqlite._file_name )
         {}
 
         /**
@@ -86,6 +90,7 @@ namespace eadlib {
         inline SQLite & SQLite::operator =( SQLite &&rhs ) noexcept {
             _connected_flag = rhs._connected_flag;
             _database = rhs._database;
+            _file_name = rhs._file_name;
             return *this;
         }
 
@@ -99,7 +104,18 @@ namespace eadlib {
                 _connected_flag = disconnect();
             }
             _connected_flag = connect( file_name );
+            if( connected() ) {
+                _file_name = file_name;
+            }
             return _connected_flag;
+        }
+
+        /**
+         * Gets the file name of the currently opened database
+         * @return File name
+         */
+        inline std::string SQLite::getFileName() const {
+            return _file_name;
         }
 
         /**
@@ -109,6 +125,9 @@ namespace eadlib {
         inline bool SQLite::close() {
             if( _connected_flag ) {
                 _connected_flag  = !disconnect();
+                if( !connected() ) {
+                    _file_name = "";
+                }
             }
             return _connected_flag;
         }

@@ -9,7 +9,7 @@
 
     @note           If the regex is malformed an std::regex_error exception will be
                     raise on ````option(..)```` by the std::regex() constructor.
-    @dependencies   eadlib::cli::Option
+    @dependencies   eadlib::cli::ParserOption, eadlib::cli::ParserValue
     @author         E. A. Davison
     @copyright      E. A. Davison 2016
     @license        GNUv2 Public License
@@ -18,48 +18,58 @@
                     Example in parsing a simple username to the program from the cli argument list
 */
 
-#ifndef EADLIB_CLI_PARSER_H
-#define EADLIB_CLI_PARSER_H
+#ifndef EADLIB_CLI_PARSER_PARSER_H
+#define EADLIB_CLI_PARSER_PARSER_H
 
 #include <iostream>
+#include <regex>
 #include <unordered_map>
 #include <list>
-#include "Option.h"
+#include <vector>
 
-//TODO printInfo() -> organise size of columns based on largest item inside of each
-//TODO printInfo() -> option to move the required and default flag/desc to next line?
+#include "ParserOption.h"
 
 namespace eadlib {
     namespace cli {
         class Parser {
           public:
+            typedef std::vector<std::pair<bool, std::string>> OptionValues_t;
             struct ValueCheck {
                 std::regex regex;
                 std::string fail_msg;
                 std::string default_value = "";
             };
             Parser();
+            Parser( const std::string &program_heading );
             ~Parser();
-            void option( const std::string &cat,
+            //Output stream & print
+            friend std::ostream &operator <<( std::ostream &os, const Parser &option );
+            std::ostream & printInfo( std::ostream &out ) const;
+            //Option setup
+            void option( const std::string &category,
                          const std::string &name,
-                         const std::string &alt,
-                         const std::string &desc,
+                         const std::string &alternative,
+                         const std::string &description,
                          const bool &required,
                          std::list<ValueCheck> value_regexs );
-            void addTitleLine( const std::string &title );
+            //Information setup
+            void addTitle( const std::string &title );
             void addDescriptionLine( const std::string &usage );
             void addExampleLine( const std::string &example );
+            //Process arguments
             bool parse( const int &argc, char *argv[] );
-            void printInfo() const;
-            std::vector<bool> getValueFlags( const std::string &option_name ) const;
-            std::vector<std::string> getValues( const std::string &option_name ) const;
+            //Properties
+            bool optionUsed( const std::string &option_name ) const;
+            OptionValues_t getValues( const std::string &option_name ) const;
+
+
             size_t size() const;
             bool isEmpty() const;
 
           private:
             typedef std::unordered_map<std::string, size_t> IndexMap_t;
             typedef std::unordered_map<std::string, std::list<size_t>> MultiIndexMap_t;
-            std::vector<Option>                    _options;
+            std::vector<ParserOption>              _options;
             IndexMap_t                             _name_map;
             IndexMap_t                             _alt_map;
             MultiIndexMap_t                        _category_map;
@@ -69,44 +79,96 @@ namespace eadlib {
             std::vector<std::string>               _usage_examples;
         };
 
+        //--------------------------------------------------------------------------------------------------------------------------------------------
+        // ParserOption class public method implementations
+        //--------------------------------------------------------------------------------------------------------------------------------------------
         /**
          * Constructor
          */
-        inline Parser::Parser() :
+        inline eadlib::cli::Parser::Parser() :
             _program_title( "" )
+        {}
+
+        /**
+         * Constructor
+         * @param program_heading Program title
+         */
+        inline Parser::Parser( const std::string &program_heading ) :
+            _program_title( program_heading )
         {}
 
         /**
          * Destructor
          */
-        inline Parser::~Parser() {}
+        inline eadlib::cli::Parser::~Parser() {}
+
+        /**
+         * Output stream operator
+         * @param os Output stream
+         * @param parser Parser instance
+         * @return Output stream
+         */
+        inline std::ostream & operator <<( std::ostream &os, const Parser &parser ) {
+            return parser.printInfo( os );
+        }
+
+        /**
+         * Prints the parser information
+         * @param out Output stream
+         * @return Output stream
+         */
+        inline std::ostream &Parser::printInfo( std::ostream &out ) const {
+            if( !_program_title.empty() ) {
+                out << _program_title << std::endl;
+            }
+            if( !_usage_description.empty() ) {
+                out << "-|Description|-" << std::endl;
+                for( auto desc : _usage_description ) {
+                    out << desc << std::endl;
+                }
+                out << std::endl;
+            }
+            for( auto cat : _category_order ) {
+                out << "-|" << cat->first << "|-" << std::endl;
+                for( auto i : cat->second ) {
+                    out << "  " << _options.at( i ) << std::endl;
+                }
+                out << std::endl;
+            }
+            if( !_usage_examples.empty() ) {
+                out << "-|Example(s)|-" << std::endl;
+                for( auto eg : _usage_examples ) {
+                    out << eg << std::endl;
+                }
+                out << std::endl;
+            }
+        }
 
         /**
          * Adds option to the parser
-         * @param category     Option category
-         * @param name         Option name (e.g. 'n')
-         * @param alternative  Option alternative name (e.g.: 'name')
-         * @param description  Option description
-         * @param required     Required flag - adds an anotation in the description of the option
-         * @param value_regexs List of { regular expression, error message, default value } for values expected in order
+         * @param category     Category of the option
+         * @param name         Name of option (short version)
+         * @param alternative  Alternative name of option (long version)
+         * @param description  Description of the option
+         * @param required     Required flag
+         * @param value_regexs Sets of regex, error msg and default (if any) values for values expected
          */
         inline void Parser::option( const std::string &category,
                                     const std::string &name,
                                     const std::string &alternative,
                                     const std::string &description,
                                     const bool &required,
-                                    std::list<ValueCheck> value_regexs ) {
+                                    std::list<Parser::ValueCheck> value_regexs ) {
             //creating/adding index entries for the option
-            auto insert_result = _category_map.insert( typename MultiIndexMap_t::value_type( category,
-                                                                                             std::list<size_t>() ) );
+            auto insert_result = _category_map.emplace( category, std::list<size_t>() );
             if( insert_result.second ) { //if category was added
-                _category_order.emplace_back( insert_result.first ); //add the MultiIndexMap_t iterator
+                _category_order.emplace_back( insert_result.first );
             }
             _category_map.at( category ).emplace_back( _options.size() );
-            _name_map.insert( typename IndexMap_t::value_type( name, _options.size() ) );
-            _alt_map.insert( typename IndexMap_t::value_type( alternative, _options.size() ) );
+            _name_map.emplace( name, _options.size() );
+            _alt_map.emplace( alternative, _options.size() );
             //creating the option and adding the expected values if any
-            auto option = Option( name, alternative, description, required );
+            auto option = ParserOption( name, alternative, description, required );
             for( auto regex : value_regexs ) {
                 if( regex.default_value.empty() ) {
                     option.addValueRegex( regex.regex, regex.fail_msg );
@@ -118,37 +180,38 @@ namespace eadlib {
         }
 
         /**
-         * Adds a title line to the Parser text
-         * @param title Title (program name and version typically)
+         * Adds a title heading for the information of the parser
+         * @param title Program title
          */
-        inline void Parser::addTitleLine( const std::string &title ) {
+        inline void Parser::addTitle( const std::string &title ) {
             _program_title = title;
         }
+
         /**
-         * Adds a description block to the Parser info
-         * @param usage Text to be printed in the description block
+         * Adds a description line for the information of the parser
+         * @param usage Usage description line
          */
         inline void Parser::addDescriptionLine( const std::string &usage ) {
             _usage_description.emplace_back( usage );
         }
 
         /**
-         * Adds an example block to the Parser info
-         * @param example Text to be printed in the example block
+         * Adds an example line for the information of the parser
+         * @param example Example of usage line
          */
         inline void Parser::addExampleLine( const std::string &example ) {
             _usage_examples.emplace_back( example );
         }
 
         /**
-         * Parses and checks cli arguments
-         * @param argc
-         * @param argv
+         * Parses the command line arguments
+         * @param argc Number of arguments
+         * @param argv Arguments
          * @return Success
          */
         inline bool Parser::parse( const int &argc, char **argv ) {
             if( argc < 2 ) {
-                printInfo();
+                printInfo( std::cout );
                 return false;
             } else {
                 std::vector<std::string> arguments;
@@ -158,11 +221,12 @@ namespace eadlib {
                 //Processing all args
                 std::vector<std::string>::iterator it = arguments.begin();
                 while( it != arguments.end() ) {
-                    if( _name_map.find( *it ) != _name_map.end()) { //found as std name
+                    if( _name_map.find( *it ) != _name_map.end()) { //found as std short name
                         size_t index = _name_map.at( *it );
                         std::string name = *it;
                         size_t count { 0 };
-                        while( count < _options.at( index ).valuesExpected() ) {
+                        _options.at( index ).setUsedFlag();
+                        while( count < _options.at( index ).valuesExpectedCount() ) {
                             it++;
                             if( !_options.at( index ).setValue( count, *it ) ) {
                                 std::cerr << "Value '" << *it << "' for Option '"
@@ -171,11 +235,12 @@ namespace eadlib {
                             }
                             count++;
                         }
-                    } else if( _alt_map.find( *it ) != _alt_map.end()) { //found as alternative name
+                    } else if( _alt_map.find( *it ) != _alt_map.end()) { //found as alternative long name
                         size_t index = _alt_map.at( *it );
                         std::string name = *it;
                         size_t count { 0 };
-                        while( count < _options.at( index ).valuesExpected() ) {
+                        _options.at( index ).setUsedFlag();
+                        while( count < _options.at( index ).valuesExpectedCount() ) {
                             it++;
                             if( !_options.at( index ).setValue( count, *it ) ) {
                                 std::cerr << "Value '" << *it << "' for Option '"
@@ -195,92 +260,34 @@ namespace eadlib {
         }
 
         /**
-         * Prints Parser info with all the options added
+         * Checks if an option was used (good when no values are expected for option)
+         * @return Usage state
          */
-        inline void Parser::printInfo() const {
-            if( !_program_title.empty() ) {
-                std::cout << _program_title << std::endl;
-            }
-            if( !_usage_description.empty() ) {
-                std::cout << "-|Description|-" << std::endl;
-                for( auto desc : _usage_description ) {
-                    std::cout << desc << std::endl;
-                }
-                std::cout << std::endl;
-            }
-            for( auto cat : _category_order ) {
-                std::cout << "-|" << cat->first << "|-" << std::endl;
-                for( auto i : cat->second ) {
-                    std::cout << "  " << _options.at( i ) << std::endl;
-                }
-                std::cout << std::endl;
-            }
-            if( !_usage_examples.empty() ) {
-                std::cout << "-|Example(s)|-" << std::endl;
-                for( auto eg : _usage_examples ) {
-                    std::cout << eg << std::endl;
-                }
-                std::cout << std::endl;
+        inline bool Parser::optionUsed( const std::string &option_name ) const {
+            if( _name_map.find( option_name ) != _name_map.end()) { //found as std short name
+                size_t index = _name_map.at( option_name );
+                return _options.at( index ).isUsed();
+            } else if( _alt_map.find( option_name ) != _alt_map.end()) { //found as alternative long name
+                size_t index = _alt_map.at( option_name );
+                return _options.at( index ).isUsed();
+            } else { //Not a valid option
+                std::cerr << "Argument '" << option_name << "' is not recognised." << std::endl;
+                return false;
             }
         }
 
         /**
-         * Gets the list of value flags for an option (i.e. whether a value is set or not OR a default exists)
-         * @param option_name Option name
-         * @return List of flags
-         * @throws std::out_of_range when option name given is not found or there are no values for it
+         * Gets the values stored in the option
+         * @param option_name Name of the option
+         * @return Vector of pairs consisting of a set flag and the value
          */
-        inline std::vector<bool> Parser::getValueFlags( const std::string &option_name ) const {
-            if( _name_map.find( option_name ) != _name_map.end() ) {
+        inline Parser::OptionValues_t Parser::getValues( const std::string &option_name ) const {
+            if( _name_map.find( option_name ) != _name_map.end() ) { //found as std short name
                 size_t index = _name_map.at( option_name );
-                if( _options.at( index ).valuesExpected() > 0 ) {
-                    return _options.at( index ).getValueFlags();
-                } else {
-                    std::cerr << "Option '" << option_name << "' has no expected values." << std::endl;
-                    throw std::out_of_range( "[eadlib::cli::Parser::getValueFlags( std::string )] "
-                                                 "Option has no expected values." );
-                }
-            } else if( _alt_map.find( option_name ) != _alt_map.end() ) {
+                return _options.at( index ).getValues();
+            } else if( _alt_map.find( option_name ) != _alt_map.end() ) { //found as alternative long name
                 size_t index = _alt_map.at( option_name );
-                if( _options.at( index ).valuesExpected() > 0 ) {
-                    return _options.at( index ).getValueFlags();
-                } else {
-                    std::cerr << "Option '" << option_name << "' has no expected values." << std::endl;
-                    throw std::out_of_range( "[eadlib::cli::Parser::getValueFlags( std::string )] "
-                                                 "Option has no expected values." );
-                }
-            } else {
-                std::cerr << "Option '" << option_name << "' does not exist." << std::endl;
-                throw std::out_of_range( "[eadlib::cli::Parser::getValueFlags( std::string )] "
-                                             "Name of option given does not exist." );
-            }
-        }
-
-        /**
-         * Gets the list of values for an option
-         * @param option_name Option name
-         * @return List of values
-         * @throws std::out_of_range when option name given is not found or there are no values for it
-         */
-        inline std::vector<std::string> Parser::getValues( const std::string &option_name ) const {
-            if( _name_map.find( option_name ) != _name_map.end() ) {
-                size_t index = _name_map.at( option_name );
-                if( _options.at( index ).valuesSet() > 0 ) {
-                    return _options.at( index ).getValues();
-                } else {
-                    std::cerr << "Values not found for Option '" << option_name << "'." << std::endl;
-                    throw std::out_of_range( "[eadlib::cli::Parser::getValues( std::string )] "
-                                                 "Option has expected values but nothing was found." );
-                }
-            } else if( _alt_map.find( option_name ) != _alt_map.end() ) {
-                size_t index = _alt_map.at( option_name );
-                if( _options.at( index ).valuesSet() > 0 ) {
-                    return _options.at( index ).getValues();
-                } else {
-                    std::cerr << "Values not found for Option '" << option_name << "'." << std::endl;
-                    throw std::out_of_range( "[eadlib::cli::Parser::getValues( std::string )] "
-                                                 "Option has expected values but nothing was found." );
-                }
+                return _options.at( index ).getValues();
             } else {
                 std::cerr << "Option '" << option_name << "' does not exist." << std::endl;
                 throw std::out_of_range( "[eadlib::cli::Parser::getValues( std::string )] "
@@ -290,15 +297,15 @@ namespace eadlib {
 
         /**
          * Gets the number of options in the parser
-         * @return Number of options
+         * @return Number of options in parser
          */
         inline size_t Parser::size() const {
             return _options.size();
         }
 
         /**
-         * Gets the empty state of the parser
-         * @return No options state
+         * Checks if there are options in parser
+         * @return Empty state of parser
          */
         inline bool Parser::isEmpty() const {
             return _options.empty();
@@ -306,4 +313,4 @@ namespace eadlib {
     }
 }
 
-#endif //EADLIB_CLI_PARSER_H
+#endif //EADLIB_CLI_PARSER_PARSER_H

@@ -54,14 +54,13 @@ namespace eadlib {
          * Constructor
          * @param total_steps Total number of steps
          * @param width       Physical width of the progress bar
-         * @param percents    Add percent display with the bar (+5 will be added to width)
          */
         inline ProgressBar::ProgressBar( const uint64_t &total_steps, const size_t &width ) :
             _total_steps( total_steps > 0 ? total_steps - 1 : total_steps ),
             _current_step( 0 ),
             _progress_position( 0 ),
             _percent_completion( 0 ),
-            _bar_width( width > 0 ? width - 1 : width ),
+            _bar_width( width > 0 ? width - 2 : width ),
             _progress_bar( width, ' ' )
         {
             refresh();
