@@ -5,13 +5,14 @@
 #include <queue>
 #include <string>
 
+#include "eadlib/cli/graphic/ProgressBar.h"
 #include <eadlib/datastructure/WeightedGraph.h>
 
 namespace sbp {
     namespace algo {
         class GraphCompressor {
           public:
-            GraphCompressor( eadlib::WeightedGraph<std::string> &in_graph );
+            GraphCompressor( eadlib::WeightedGraph<std::string> &graph );
             ~GraphCompressor();
             void compress();
           private:
@@ -26,7 +27,7 @@ namespace sbp {
             bool validateCandidate( const GraphIterator_t &candidate,
                                     const size_t &upstream_weight );
 
-            eadlib::WeightedGraph<std::string> & _in_graph;
+            eadlib::WeightedGraph<std::string> & _graph;
             std::vector<std::string> _vector_of_kmers;
         };
     }
