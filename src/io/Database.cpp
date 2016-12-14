@@ -73,11 +73,30 @@ bool sbp::io::Database::close() {
 }
 
 /**
- * Checks if databse is connected
+ * Checks if database is connected
  * @return Connected state
  */
 bool sbp::io::Database::isOpen() const {
     return _database.connected();
+}
+
+/**
+ * Lists all the graphs stored in the database
+ * @param out Output stream
+ * @return Output stream
+ */
+std::ostream &sbp::io::Database::listGraphs( std::ostream &out ) {
+    auto table = eadlib::TableDB();
+    std::string list_query { "SELECT Name FROM Graphs" };
+    if( _database.pull( list_query, table ) > 0 ) {
+        out << "Graph(s) in '" << _database.getFileName() << "':\n";
+        for( auto it = table.begin(); it != table.end(); ++it ) {
+            out << " |- " << it->at( 0 ).getString() << "\n";
+        }
+    } else {
+        out << "No graphs in database.";
+    }
+    return out;
 }
 
 /**

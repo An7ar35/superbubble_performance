@@ -21,6 +21,7 @@ namespace sbp {
             bool create( const std::string &graph_name );
             bool remove( const std::string &graph_name );
             bool exists( const std::string &graph_name );
+            std::ostream & listGraphs( std::ostream &out );
             std::string getID( const std::string &graph_name );
             bool writeNode( const std::string &graph_id,
                             const size_t &index,
