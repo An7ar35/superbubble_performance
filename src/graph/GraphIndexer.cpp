@@ -51,10 +51,11 @@ bool sbp::graph::GraphIndexer::storeIntoDB( const std::string &graph_name, const
         ( index_progress++ ).printPercentBar( std::cout, 2 );
     }
     _db.commitTransaction();
-    std::cout << index_progress.complete() << std::endl;
+    index_progress.complete().printPercentBar( std::cout, 2 );
+    std::cout << std::endl;
     //Indexed graph
     std::cout << "-> DB: writing graph edges." << std::endl;
-    auto edge_progress = eadlib::cli::ProgressBar( graph.size(), 70 );
+    auto edge_progress = eadlib::cli::ProgressBar( graph.nodeCount(), 70 );
     _db.beginTransaction();
     for( auto node : graph ) {
         edge_progress.printPercentBar( std::cout, 2 );
@@ -63,12 +64,12 @@ bool sbp::graph::GraphIndexer::storeIntoDB( const std::string &graph_name, const
             for( auto dest : node.second.childrenList ) {
                 size_t destination_node = kmer_index.at( dest );
                 _db.writeEdge( graph_ID, origin_node, destination_node, node.second.weight.at( dest ) );
-                edge_progress += node.second.weight.at( dest );
-                edge_progress.printPercentBar( std::cout, 2 );
             }
+            ( edge_progress++ ).printPercentBar( std::cout, 2 );
         }
     }
     _db.commitTransaction();
-    std::cout << edge_progress.complete() << std::endl;
+    edge_progress.complete().printPercentBar( std::cout, 2 );
+    std::cout << std::endl;
     return true;
 }
