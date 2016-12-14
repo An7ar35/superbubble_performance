@@ -30,7 +30,7 @@ set(SOURCE_FILES
         src/graph/GraphIndexer.cpp
         src/graph/GraphIndexer.h
         src/PipelineRunner.cpp
-        src/PipelineRunner.h)
+        src/PipelineRunner.h src/cli/CliOptions.cpp src/cli/CliOptions.h)
 
 set(SQLITE3_FILES
         external/sqlite3/sqlite3.h
