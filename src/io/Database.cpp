@@ -1,3 +1,4 @@
+#include <eadlib/cli/graphic/ProgressBar.h>
 #include "Database.h"
 
 /**
@@ -266,13 +267,16 @@ bool sbp::io::Database::loadGraph( const std::string &graph_name, eadlib::Weight
     }
     long long int total_rows { table.at( 0, 0 ).getInt() };
     //Filling graph
-    if( total_rows < 1000 ) { //pull everything
+    auto progress = eadlib::cli::ProgressBar( static_cast<size_t>( total_rows ), 70 );
+    size_t chunk_size { 1000 };
+    if( total_rows < chunk_size ) { //pull everything
         std::string all_data_query { "SELECT * FROM edges_" + std::to_string( graph_id ) };
         if( _database.pull( all_data_query, table ) < 1 ) {
             LOG_ERROR( "sbp::io::Database::loadIndexGraph( ", graph_name, ", .. )] Problem pulling all data from 'edges_", graph_id, "' table." );
             return false;
         } else {
             for( auto it = table.begin(); it != table.end(); ++it ) { //Iterate the rows
+                ( progress++ ).printPercentBar( std::cout, 2 );
                 graph.createDirectedEdge_fast( static_cast<size_t>( it->at( 0 ).getInt() ),   //Origin node ID
                                                static_cast<size_t>( it->at( 1 ).getInt() ),   //Destination node ID
                                                static_cast<size_t>( it->at( 2 ).getInt() ) ); //Edge weight
@@ -281,19 +285,26 @@ bool sbp::io::Database::loadGraph( const std::string &graph_name, eadlib::Weight
     } else { //pull per 1000 size chunks
         size_t chunks { 0 };
         size_t offset { 0 };
-        std::string chunk_query = { "SELECT * FROM edges_" + std::to_string( graph_id ) + " LIMIT 1000 OFFSET " + std::to_string( offset ) };
+        std::string chunk_query = { "SELECT * FROM edges_" + std::to_string( graph_id )
+                                    + " LIMIT "  + std::to_string( chunk_size )
+                                    + " OFFSET " + std::to_string( offset ) };
         while( _database.pull( chunk_query, table ) ) {
             chunks++;
             for( auto it = table.begin(); it != table.end(); ++it ) { //Iterate the rows
+                ( progress++ ).printPercentBar( std::cout, 2 );
                 graph.createDirectedEdge_fast( static_cast<size_t>( it->at( 0 ).getInt() ),   //Origin node ID
                                                static_cast<size_t>( it->at( 1 ).getInt() ),   //Destination node ID
                                                static_cast<size_t>( it->at( 2 ).getInt() ) ); //Edge weight
             }
-            offset += 1000;
-            chunk_query = { "SELECT * FROM edges_" + std::to_string( graph_id ) + " LIMIT 1000 OFFSET " + std::to_string( offset ) };
+            offset += chunk_size;
+            chunk_query = { "SELECT * FROM edges_" + std::to_string( graph_id )
+                            + " LIMIT " + std::to_string( chunk_size )
+                            + " OFFSET " + std::to_string( offset ) };
         }
         LOG_DEBUG( "[sbp::io::Database::loadIndexGraph( ", graph_name, ", .. )] Processed ", chunks, " chunks from 'edges_", graph_id, "' table." );
     }
+    ( progress.complete() ).printPercentBar( std::cout, 2 );
+    std::cout << std::endl;
     return true;
 }
 
@@ -304,7 +315,117 @@ bool sbp::io::Database::loadGraph( const std::string &graph_name, eadlib::Weight
  * @return Success
  */
 bool sbp::io::Database::loadGraph( const std::string &graph_name, eadlib::WeightedGraph<std::string> &graph ) {
-    //TODO
+    auto graph_id = getGraphID( graph_name );
+    //Error control
+    if( graph_id < 0 ) {
+        LOG_ERROR( "sbp::io::Database::loadIndexGraph( ", graph_name, ", .. )] Graph not found in DB." );
+        return false;
+    }
+    if( !graph.isEmpty() ) {
+        LOG_ERROR( "sbp::io::Database::loadIndexGraph( ", graph_name, ", .. )] WeightedGraph<size_t> instance not empty." );
+        return false;
+    }
+    //Getting number of kmer nodes
+    auto table = eadlib::TableDB();
+    std::string index_size_query { "SELECT COUNT(*) FROM kmers_" + std::to_string( graph_id ) };
+    if( _database.pull( index_size_query, table ) < 1 || table.at( 0, 0 ).getInt() < 1 ) {
+        LOG_ERROR( "sbp::io::Database::loadIndexGraph( ", graph_name, ", .. )] Problem getting size of 'kmers_", graph_id, "' table." );
+        return false;
+    }
+    auto total_kmer_rows = static_cast<size_t>( table.at( 0, 0 ).getInt() );
+    //Getting number of unique edges
+    std::string edges_size_query { "SELECT COUNT(*) FROM edges_" + std::to_string( graph_id ) };
+    if( _database.pull( edges_size_query, table ) < 1 || table.at( 0, 0 ).getInt() < 1 ) {
+        LOG_ERROR( "sbp::io::Database::loadIndexGraph( ", graph_name, ", .. )] Problem getting size of 'edges_", graph_id, "' table." );
+        return false;
+    }
+    auto total_edge_rows = static_cast<size_t>( table.at( 0, 0 ).getInt() );
+    //Progress bar setup
+    auto progress1 = eadlib::cli::ProgressBar( total_kmer_rows, 70 );
+    auto progress2 = eadlib::cli::ProgressBar( total_edge_rows, 70 );
+    //----Gathering index-kmer string mapping----//
+    std::cout << "-> Load graph: gathering index of kmer string for mapping..." << std::endl;
+    std::unordered_map<size_t, std::string> index_map;
+    size_t chunk_size { 1000 };
+    if( total_kmer_rows < chunk_size ) { //pull everything
+        std::string all_data_query { "SELECT * FROM kmers_" + std::to_string( graph_id ) };
+        if( _database.pull( all_data_query, table ) < 1 ) {
+            LOG_ERROR( "sbp::io::Database::loadIndexGraph( ", graph_name, ", .. )] Problem pulling all data from 'kmers_", graph_id, "' table." );
+            return false;
+        } else {
+            for( auto it = table.begin(); it != table.end(); ++it ) { //Iterate the rows
+                ( progress1++ ).printPercentBar( std::cout, 2 );
+                index_map.emplace( static_cast<size_t>( it->at( 0 ).getInt() ), //Index
+                                   it->at( 1 ).getString() );                   //Kmer string
+            }
+        }
+    } else { //pull per 1000 size chunks
+        size_t chunks { 0 };
+        size_t offset { 0 };
+        std::string chunk_query = { "SELECT * FROM kmers_" + std::to_string( graph_id )
+                                    + " LIMIT "  + std::to_string( chunk_size )
+                                    + " OFFSET " + std::to_string( offset ) };
+        while( _database.pull( chunk_query, table ) ) {
+            chunks++;
+            for( auto it = table.begin(); it != table.end(); ++it ) { //Iterate the rows
+                ( progress1++ ).printPercentBar( std::cout, 2 );
+                index_map.emplace( static_cast<size_t>( it->at( 0 ).getInt() ), //Index
+                                   it->at( 1 ).getString() );                   //Kmer string
+            }
+            offset += chunk_size;
+            chunk_query = { "SELECT * FROM kmers_" + std::to_string( graph_id )
+                            + " LIMIT " + std::to_string( chunk_size )
+                            + " OFFSET " + std::to_string( offset ) };
+        }
+        LOG_DEBUG( "[sbp::io::Database::loadIndexGraph( ", graph_name, ", .. )] Processed ", chunks, " chunks from 'kmers_", graph_id, "' table." );
+    }
+    ( progress1.complete() ).printPercentBar( std::cout, 2 );
+    std::cout << std::endl;
+    //----Processing edges from table into the graph as kmer strings----//
+    std::cout << "-> Load graph: processing edges..." << std::endl;
+    //Filling graph
+    if( total_edge_rows < chunk_size ) { //pull everything
+        std::string all_data_query { "SELECT * FROM edges_" + std::to_string( graph_id ) };
+        if( _database.pull( all_data_query, table ) < 1 ) {
+            LOG_ERROR( "sbp::io::Database::loadIndexGraph( ", graph_name, ", .. )] Problem pulling all data from 'edges_", graph_id, "' table." );
+            return false;
+        } else {
+            for( auto it = table.begin(); it != table.end(); ++it ) { //Iterate the rows
+                ( progress2++ ).printPercentBar( std::cout, 2 );
+                std::string from_kmer = index_map.at( static_cast<size_t>( it->at( 0 ).getInt() ) );
+                std::string to_kmer   = index_map.at( static_cast<size_t>( it->at( 1 ).getInt() ) );
+                size_t      weight    = static_cast<size_t>( it->at( 2 ).getInt() );
+                graph.createDirectedEdge_fast( from_kmer, //Origin node Kmer
+                                               to_kmer,   //Destination node Kmer
+                                               weight );  //Edge weight
+            }
+        }
+    } else { //pull per 1000 size chunks
+        size_t chunks { 0 };
+        size_t offset { 0 };
+        std::string chunk_query = { "SELECT * FROM edges_" + std::to_string( graph_id )
+                                    + " LIMIT "  + std::to_string( chunk_size )
+                                    + " OFFSET " + std::to_string( offset ) };
+        while( _database.pull( chunk_query, table ) ) {
+            chunks++;
+            for( auto it = table.begin(); it != table.end(); ++it ) { //Iterate the rows
+                ( progress2++ ).printPercentBar( std::cout, 2 );
+                std::string from_kmer = index_map.at( static_cast<size_t>( it->at( 0 ).getInt() ) );
+                std::string to_kmer   = index_map.at( static_cast<size_t>( it->at( 1 ).getInt() ) );
+                size_t      weight    = static_cast<size_t>( it->at( 2 ).getInt() );
+                graph.createDirectedEdge_fast( from_kmer, //Origin node Kmer
+                                               to_kmer,   //Destination node Kmer
+                                               weight );  //Edge weight
+            }
+            offset += chunk_size;
+            chunk_query = { "SELECT * FROM edges_" + std::to_string( graph_id )
+                            + " LIMIT " + std::to_string( chunk_size )
+                            + " OFFSET " + std::to_string( offset ) };
+        }
+        LOG_DEBUG( "[sbp::io::Database::loadIndexGraph( ", graph_name, ", .. )] Processed ", chunks, " chunks from 'edges_", graph_id, "' table." );
+    }
+    ( progress2.complete() ).printPercentBar( std::cout, 2 );
+    std::cout << std::endl;
     return false;
 }
 
