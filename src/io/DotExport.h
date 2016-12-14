@@ -7,14 +7,14 @@
 
 namespace sbp {
     namespace io {
-        class DotExport {
+        template<class T> class DotExport {
           public:
             enum class EdgeType { MULTI_EDGE, WEIGHT_LABEL};
             DotExport( eadlib::io::FileWriter &writer );
             ~DotExport();
-            template<class T> bool exportToDot( const std::string &graph_name,
-                                                const eadlib::WeightedGraph<T> &graph,
-                                                const bool &weight_label );
+            bool exportToDot( const std::string &graph_name,
+                              const eadlib::WeightedGraph<T> &graph,
+                              const bool &weight_label );
           private:
             eadlib::io::FileWriter &_writer;
         };
@@ -26,14 +26,14 @@ namespace sbp {
          * Constructor
          * @param writer EADLib File writer
          */
-        DotExport::DotExport( eadlib::io::FileWriter &writer ) :
+        template<class T> DotExport<T>::DotExport( eadlib::io::FileWriter &writer ) :
             _writer( writer )
         {}
 
         /**
          * Destructor
          */
-        DotExport::~DotExport() {}
+        template<class T> DotExport<T>::~DotExport() {}
 
 
         /**
@@ -42,7 +42,7 @@ namespace sbp {
          * @param weight_label Shows multi-edges as weight labels (default=true)
          * @return Success
          */
-        template<class T> bool DotExport::exportToDot( const std::string &graph_name,
+        template<class T> bool DotExport<T>::exportToDot( const std::string &graph_name,
                                                        const eadlib::WeightedGraph<T> &graph,
                                                        const bool &weight_label ) {
             if( !_writer.isOpen() && !_writer.open() ) {
