@@ -138,7 +138,7 @@ namespace eadlib {
             }
             return _rows.at( row ).at( column );
         } else {
-            LOG_ERROR( "[eadlib::TableDB::at( ", column, ", ", row, " )] Index out of bounds (", _rows.size(), " x ", _rows.at( row ).getLength(), ")." );
+            LOG_ERROR( "[eadlib::TableDB::at( ", column, ", ", row, " )] Index out of bounds (", _columns.size(), " x ", _rows.size(), ")." );
             throw std::out_of_range( "eadlib::Table::operator() : index out of range" );
         }
     }
@@ -251,10 +251,10 @@ namespace eadlib {
             if( table.getRowCount() == 0 ) {
                 out << "No data in table..." << std::endl;
             } else {
-                for( int i = 0; i < table.getRowCount(); i++ ) { //Rows
+                for( int row = 0; row < table.getRowCount(); row++ ) { //Rows
                     out << "| ";
-                    for( int j = 0; j < table.getColCount(); j++ ) { //Columns
-                        out << table.at( i, j ) << " | ";
+                    for( int column = 0; column < table.getColCount(); column++ ) { //Columns
+                        out << table.at( column, row ) << " | ";
                     }
                     out << std::endl;
                 }
@@ -550,7 +550,7 @@ namespace eadlib {
         _integrity_flag = false;
         //check data table
         size_t base_height = _rows.size();
-        size_t base_width  = _columns.size(); //_rows.at( 0 ).getLength();
+        size_t base_width  = _columns.size();
         //Column(s) exist
         if( getColCount() < 1 ) {
             LOG_ERROR( "[eadlib::TableDB::checkBorders()] Table has no Columns." );
@@ -582,7 +582,7 @@ namespace eadlib {
             return false;
         }
         _integrity_flag = true;
-        LOG_TRACE( "[eadlib::TableDB::checkBorders()] > All rows are of consistent and correct width." );
+        LOG_TRACE( "[eadlib::TableDB::checkBorders()] All ", _rows.size(), " rows are of consistent and correct width (", base_width, ")." );
         return _integrity_flag;
     }
 

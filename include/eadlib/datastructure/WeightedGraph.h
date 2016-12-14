@@ -32,7 +32,7 @@ namespace eadlib {
         };
         typedef std::unordered_map<T, NodeAdjacency> Graph_t;
         //Constructors/Destructor
-        WeightedGraph();
+        WeightedGraph( const std::string &name = "wgraph" );
         WeightedGraph( std::initializer_list<T> list );
         WeightedGraph( const WeightedGraph<T> &graph );
         WeightedGraph( WeightedGraph<T> &&graph );
@@ -65,6 +65,8 @@ namespace eadlib {
         size_t getOutDegree( const T &node ) const;
         size_t getInDegree_weighted( const T &node );
         size_t getOutDegree_weighted( const T &node );
+        void setName( const std::string &name );
+        std::string getName() const;
         //Print out
         std::ostream & printAdjacencyList( std::ostream &out ) const;
         std::ostream & printGraphNodes( std::ostream &out ) const;
@@ -72,8 +74,9 @@ namespace eadlib {
       private:
         bool checkNodesExist( const T &a, const T &b ) const;
         template <class U> bool checkOverflow( U a, U b ) const;
-        Graph_t _adjacencyList;
-        size_t  _edgeCount;
+        Graph_t     _adjacencyList;
+        size_t      _edgeCount;
+        std::string _name;
     };
 
     //-----------------------------------------------------------------------------------------------------------------
@@ -82,8 +85,9 @@ namespace eadlib {
     /**
      * Constructor (Default)
      */
-    template<class T> WeightedGraph<T>::WeightedGraph() :
-        _edgeCount( 0 )
+    template<class T> WeightedGraph<T>::WeightedGraph( const std::string &name ) :
+        _edgeCount( 0 ),
+        _name( name )
     {}
 
     /**
@@ -91,7 +95,8 @@ namespace eadlib {
      * @param list Initializer_list of Node keys
      */
     template<class T> WeightedGraph<T>::WeightedGraph( std::initializer_list<T> list ) :
-        _edgeCount( 0 )
+        _edgeCount( 0 ),
+        _name( "wgraph" )
     {
         for( typename std::initializer_list<T>::iterator it = list.begin(); it != list.end(); ++it ) {
             _adjacencyList.insert( typename Graph_t::value_type( *it, NodeAdjacency() ) );
@@ -104,7 +109,8 @@ namespace eadlib {
      */
     template<class T> WeightedGraph<T>::WeightedGraph( const WeightedGraph<T> &graph ) :
         _edgeCount( graph._edgeCount ),
-        _adjacencyList( graph._adjacencyList )
+        _adjacencyList( graph._adjacencyList ),
+        _name( graph._name )
     {}
 
     /**
@@ -113,7 +119,8 @@ namespace eadlib {
      */
     template<class T> WeightedGraph<T>::WeightedGraph( WeightedGraph<T> &&graph ) :
         _edgeCount( graph._edgeCount ),
-        _adjacencyList( graph._adjacencyList )
+        _adjacencyList( graph._adjacencyList ),
+        _name( graph._name )
     {}
 
 
@@ -651,6 +658,22 @@ namespace eadlib {
             edge_counter += getWeight( node, child );
         }
         return edge_counter;
+    }
+
+    /**
+     * Sets the name of the Graph
+     * @param name Name of Graph
+     */
+    template<class T> void WeightedGraph<T>::setName( const std::string &name ) {
+        _name = name;
+    }
+
+    /**
+     * Gets the name of the Graph
+     * @return Name of Graph
+     */
+    template<class T> std::string WeightedGraph<T>::getName() const {
+        return _name;
     }
 
     /**

@@ -37,7 +37,7 @@ namespace eadlib {
         };
         typedef std::unordered_map<T, NodeAdjacency> Graph_t;
         //Constructors/Destructor
-        Graph();
+        Graph( const std::string &name = "graph" );
         Graph( std::initializer_list<T> list );
         Graph( const Graph<T> &graph );
         Graph( Graph<T> &&graph );
@@ -64,14 +64,17 @@ namespace eadlib {
         size_t size() const; //Edge count
         size_t getInDegree( const T &node ) const;
         size_t getOutDegree( const T &node ) const;
+        void setName( const std::string &name );
+        std::string getName() const;
         //Print out
         std::ostream & printAdjacencyList( std::ostream &out ) const;
         std::ostream & printGraphNodes( std::ostream &out ) const;
         std::ostream & printStats( std::ostream &out ) const;
       private:
         bool checkNodesExist( const T& from, const T &to ) const;
-        Graph_t _adjacencyList;
-        size_t  _edgeCount;
+        Graph_t     _adjacencyList;
+        size_t      _edgeCount;
+        std::string _name;
     };
 
     //-----------------------------------------------------------------------------------------------------------------
@@ -80,8 +83,9 @@ namespace eadlib {
     /**
      * Constructor (Default)
      */
-    template<class T> Graph<T>::Graph() :
-        _edgeCount( 0 )
+    template<class T> Graph<T>::Graph( const std::string &name ) :
+        _edgeCount( 0 ),
+        _name( name )
     {}
 
     /**
@@ -89,7 +93,8 @@ namespace eadlib {
      * @param list Initializer_list of Node keys
      */
     template<class T> Graph<T>::Graph( std::initializer_list<T> list ) :
-        _edgeCount( 0 )
+        _edgeCount( 0 ),
+        _name( "graph" )
     {
         for( typename std::initializer_list<T>::iterator it = list.begin(); it != list.end(); ++it ) {
             _adjacencyList.insert( typename Graph_t::value_type( *it, NodeAdjacency() ) );
@@ -102,7 +107,8 @@ namespace eadlib {
      */
     template<class T> Graph<T>::Graph( const Graph<T> &graph ) :
         _edgeCount( graph._edgeCount ),
-        _adjacencyList( graph._adjacencyList )
+        _adjacencyList( graph._adjacencyList ),
+        _name( graph._name )
     {}
 
     /**
@@ -111,7 +117,8 @@ namespace eadlib {
      */
     template<class T> Graph<T>::Graph( Graph<T> &&graph ) :
         _edgeCount( graph._edgeCount ),
-        _adjacencyList( graph._adjacencyList )
+        _adjacencyList( graph._adjacencyList ),
+        _name( graph._name )
     {}
 
 
@@ -447,6 +454,22 @@ namespace eadlib {
             return 0;
         }
         return _adjacencyList.at( node ).childrenList.size();
+    }
+
+    /**
+     * Sets the name of the Graph
+     * @param name Name of Graph
+     */
+    template<class T> void Graph<T>::setName( const std::string &name ) {
+        _name = name;
+    }
+
+    /**
+     * Gets the name of the Graph
+     * @return Name of Graph
+     */
+    template<class T> std::string Graph<T>::getName() const {
+        return _name;
     }
 
     /**
