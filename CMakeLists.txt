@@ -26,7 +26,11 @@ set(SOURCE_FILES
         src/algorithm/Comparator.cpp
         src/algorithm/Comparator.h
         src/io/Database.cpp
-        src/io/Database.h src/graph/GraphIndexer.cpp src/graph/GraphIndexer.h)
+        src/io/Database.h
+        src/graph/GraphIndexer.cpp
+        src/graph/GraphIndexer.h
+        src/PipelineRunner.cpp
+        src/PipelineRunner.h)
 
 set(SQLITE3_FILES
         external/sqlite3/sqlite3.h
