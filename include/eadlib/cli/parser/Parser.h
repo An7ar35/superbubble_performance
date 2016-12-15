@@ -59,6 +59,7 @@ namespace eadlib {
             //Process arguments
             bool parse( const int &argc, char *argv[] );
             //Properties
+            bool requirementFulfilled() const;
             bool optionUsed( const std::string &option_name ) const;
             OptionValues_t getValues( const std::string &option_name ) const;
 
@@ -254,6 +255,19 @@ namespace eadlib {
                         return false;
                     }
                     it++;
+                }
+            }
+            return true;
+        }
+
+        /**
+         * Checks if all the required options where in the argument list
+         * @return Fulfilled requirement state
+         */
+        inline bool Parser::requirementFulfilled() const {
+            for( auto it = _options.begin(); it != _options.end(); ++it ) {
+                if( it->isNeeded() && !it->isUsed() ) {
+                    return false;
                 }
             }
             return true;
