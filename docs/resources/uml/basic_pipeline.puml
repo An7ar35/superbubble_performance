@@ -1,0 +1,32 @@
+@startuml
+skinparam componentStyle uml2
+
+package eadlib #DDDDDD{
+    [wrapper::SQLite]
+    [WeightedGraph<T>]
+}
+
+package sbp #DDDDDD {
+    [io::FastaParser]
+    [io::Database]
+    [io::DotExport]
+    [graph::GraphConstructor]
+    [graph::GraphIndexer]
+    [algo::GraphCompressor]
+}
+
+database "SQLite\nDB" as DB
+file ".FASTA\nreads\nfile" as FASTA
+file ".Dot\nformat\ngraph\nfile" as DOT
+
+FASTA -down-> [io::FastaParser]
+[io::FastaParser] -down-> [graph::GraphConstructor]  : "Sequencer reads"
+[graph::GraphConstructor] -down-> [algo::GraphCompressor] : [eadlib::WeightedGraph<std::string>]
+[algo::GraphCompressor] -down-> [graph::GraphIndexer] : [eadlib::WeightedGraph<std::string>]
+[graph::GraphIndexer] -down-> [io::Database]
+[io::Database] -* [wrapper::SQLite]
+[io::Database] -> [io::DotExport] : eadlib::WeightedGraph<std::string>\nor eadlib::WeightedGraph<size_t>
+[wrapper::SQLite] -down-> DB
+[io::DotExport] -right-> DOT
+
+@enduml
