@@ -9,6 +9,7 @@ genome sequencing
 2. [Graph construction example](#graph-construction-example)
     1. [Generated graphs](#generated-graphs)
     2. [Generated DB Tables](#generated-tables)
+3. [Superbubble Algorithms](#superbubble-algorithms)
 5. [Platforms Supported](#platforms-supported)
 6. [License](#license)
 
@@ -82,7 +83,32 @@ the GraphID (_n_) with the type of table: '_edges_n' and '_kmers_n_'.
 __E.g.__: For '_Test01_' above, the Edge table would be named '_edges_1_'
 and the Kmer index table '_kmers_1_'.
 
+---
+## Superbubble Algorithms <a name="superbubble-algorithms"></a>
 
+//TODO
 
-# Platforms supported #
-# License #
+---
+## Platforms supported <a name="platforms-supported"></a>
+
+The software is bundled with the components required from the EADlib library.
+
+### Linux ツ ###
+- Need a version of GCC with C++14 support (made with GCC 6.2.1)
+- CMake 3.5
+
+### Mac OSX ###
+
+- See above.
+- Homebrew might help. Untested.
+ 
+### Windows ###
+
+- Nope.
+
+---
+# License <a name="license"></a>
+
+This software is released under the [__GNU General Public License 2__](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html) license.
+
+Please reference when used in project and/or research.
