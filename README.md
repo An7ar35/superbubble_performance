@@ -34,9 +34,8 @@ genome sequencing
 ---
 ## Graph construction example <a name="graph-construction-example"></a>
 
-Using a single read sequence: "_a_long_long_long_time_"
+Using a single read sequence "_a_long_long_long_time_" with K-mer length of _5_.
 
-Using K-mer length: __5__
 
 ### Graphs generated <a name="generated-graphs"></a>
 
@@ -107,7 +106,7 @@ The software is bundled with the components required from the EADlib library.
 - Nope.
 
 ---
-# License <a name="license"></a>
+## License <a name="license"></a>
 
 This software is released under the [__GNU General Public License 2__](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html) license.
 
