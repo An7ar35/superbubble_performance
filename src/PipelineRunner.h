@@ -11,6 +11,7 @@
 #include "graph/GraphConstructor.h"
 #include "graph/GraphIndexer.h"
 #include "algorithm/GraphCompressor.h"
+#include "algorithm/Tarjan.h"
 
 namespace sbp {
     struct PipelineRunner {
@@ -21,6 +22,15 @@ namespace sbp {
         void exportToDB( const std::string &db_file_name, eadlib::WeightedGraph<std::string> &graph );
         void importFromDB( const std::string &db_file_name, eadlib::WeightedGraph<size_t> &graph );
         void importFromDB( const std::string &db_file_name, eadlib::WeightedGraph<std::string> &graph );
+        void runTarjan( const eadlib::WeightedGraph<size_t> &graph ) {
+            auto t = sbp::algo::Tarjan( graph );
+            for( auto list : t ) {
+                for( auto e : list ) {
+                    std::cout << e << ",";
+                }
+                std::cout << std::endl;
+            }
+        }
     };
 }
 
