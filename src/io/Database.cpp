@@ -166,11 +166,11 @@ bool sbp::io::Database::remove( const std::string &graph_name ) {
     if( exists( graph_name ) ) {
         bool error_flag { false };
         auto graph_id = getGraphID( graph_name );
-        if( !_database.push( "DROP TABLE graphs.kmers_" + std::to_string( graph_id ) ) ) {
+        if( !_database.push( "DROP TABLE kmers_" + std::to_string( graph_id ) ) ) {
             LOG_ERROR( "sbp::io::Database::remove( ", graph_name, " )] Couldn't drop Kmer table 'kmers_", graph_id, "'." );
             error_flag = true;
         }
-        if( !_database.push( "DROP TABLE graphs.edges_" + std::to_string( graph_id ) ) ) {
+        if( !_database.push( "DROP TABLE edges_" + std::to_string( graph_id ) ) ) {
             LOG_ERROR( "sbp::io::Database::remove( ", graph_name, " )] Couldn't drop Edges table 'edges_", graph_id, "'." );
             error_flag = true;
         }

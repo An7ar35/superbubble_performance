@@ -21,16 +21,16 @@ set(SOURCE_FILES
         src/graph/GraphConstructor.h
         src/algorithm/GraphCompressor.cpp
         src/algorithm/GraphCompressor.h
-        src/algorithm/EulerWalk.cpp
-        src/algorithm/EulerWalk.h
-        src/algorithm/Comparator.cpp
-        src/algorithm/Comparator.h
         src/io/Database.cpp
         src/io/Database.h
         src/graph/GraphIndexer.cpp
         src/graph/GraphIndexer.h
         src/PipelineRunner.cpp
-        src/PipelineRunner.h src/cli/CliOptions.cpp src/cli/CliOptions.h)
+        src/PipelineRunner.h
+        src/cli/CliOptions.cpp
+        src/cli/CliOptions.h
+        src/cli/OptionContainer.h
+        src/algorithm/Tarjan.h src/algorithm/Tarjan.cpp)
 
 set(SQLITE3_FILES
         external/sqlite3/sqlite3.h
