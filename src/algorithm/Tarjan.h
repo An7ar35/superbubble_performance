@@ -35,9 +35,14 @@ namespace sbp {
             reverse_iterator rend();
             const_reverse_iterator rcbegin();
             const_reverse_iterator rcend();
+            //Modification
+            iterator erase( iterator pos );
+            iterator erase( const_iterator pos );
+            iterator erase( iterator first, iterator last );
+            iterator erase( const_iterator first, const_iterator last );
             //Properties
-            size_t size();
-            bool isEmpty();
+            size_t size() const;
+            bool isEmpty() const;
             //Sort
             template<class Comparator> void sort( Comparator comparator );
           private:
