@@ -51,6 +51,38 @@ sbp::algo::Tarjan::const_iterator sbp::algo::Tarjan::cend() {
 }
 
 /**
+ * Reverse iterator begin()
+ * @return Reverse Iterator
+ */
+sbp::algo::Tarjan::reverse_iterator sbp::algo::Tarjan::rbegin() {
+    return _scc.rbegin();
+}
+
+/**
+ * Reverse iterator end()
+ * @return Reverse Iterator
+ */
+sbp::algo::Tarjan::reverse_iterator sbp::algo::Tarjan::rend() {
+    return _scc.rend();
+}
+
+/**
+ * Const reverse iterator begin()
+ * @return Const Reverse Iterator
+ */
+sbp::algo::Tarjan::const_reverse_iterator sbp::algo::Tarjan::rcbegin() {
+    return _scc.crbegin();
+}
+
+/**
+ * Const reverse iterator end()
+ * @return Const Reverse Iterator
+ */
+sbp::algo::Tarjan::const_reverse_iterator sbp::algo::Tarjan::rcend() {
+    return _scc.crend();
+}
+
+/**
  * Gets the number of SCCs found in graph
  * @return Size of list of SCCs
  */
@@ -135,16 +167,24 @@ void sbp::algo::Tarjan::findSCCs( const size_t &vertex_id,
     if( d->second._low_link == d->second._index ) {
         //start a new strongly connected component
         std::list<size_t> scc;
-        while( stack.top() != vertex_id ) {
-            //add w to current strongly connected component
+        if( stack.top() == vertex_id ) { //singleton scc
             scc.emplace_back( stack.top() );
             stackMember.at( stack.top() ) = false;
             stack.pop();
+            //add scc to front of list
+            _scc.emplace_front( scc );
+        } else {
+            while( stack.top() != vertex_id ) {
+                //add w to current strongly connected component
+                scc.emplace_back( stack.top() );
+                stackMember.at( stack.top() ) = false;
+                stack.pop();
+            }
+            scc.emplace_back( stack.top() );
+            stackMember.at( stack.top() ) = false;
+            stack.pop();
+            //add scc to back of list
+            _scc.emplace_back( scc );
         }
-        scc.emplace_back( stack.top() );
-        stackMember.at( stack.top() ) = false;
-        stack.pop();
-        //add scc to list
-        _scc.emplace_back( scc );
     }
 }
