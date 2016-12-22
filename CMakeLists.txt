@@ -32,10 +32,10 @@ set(SOURCE_FILES
         src/cli/OptionContainer.h
         src/algorithm/Tarjan.h
         src/algorithm/Tarjan.cpp
-        src/algorithm/superbubble/SuperBubble.cpp
-        src/algorithm/superbubble/SuperBubble.h
+        src/algorithm/superbubble/SB_Driver.cpp
+        src/algorithm/superbubble/SB_Driver.h
         src/algorithm/superbubble/SB_Linear.cpp
-        src/algorithm/superbubble/SB_Linear.h)
+        src/algorithm/superbubble/SB_Linear.h src/algorithm/superbubble/container/SuperBubble.h)
 
 set(SQLITE3_FILES
         external/sqlite3/sqlite3.h
