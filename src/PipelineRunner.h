@@ -12,7 +12,8 @@
 #include "graph/GraphIndexer.h"
 #include "algorithm/GraphCompressor.h"
 #include "algorithm/Tarjan.h"
-#include "algorithm/superbubble/SuperBubble.h"
+#include "algorithm/superbubble/SB_Driver.h"
+#include "algorithm/superbubble/container/SuperBubble.h"
 
 namespace sbp {
     struct PipelineRunner {

@@ -138,6 +138,7 @@ void sbp::PipelineRunner::importFromDB( const std::string &db_file_name, eadlib:
  */
 void sbp::PipelineRunner::runSuperbubble( const eadlib::WeightedGraph<size_t> &graph ) {
     auto writer = eadlib::io::FileWriter( "benchmarks.txt" );
-    auto sb = sbp::algo::SuperBubble( writer );
-    sb.runLinear( graph );
+    auto sb     = sbp::algo::SB_Driver( writer );
+    auto result = std::list<sbp::algo::container::SuperBubble>();
+    sb.runLinear( graph, result );
 }
