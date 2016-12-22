@@ -64,7 +64,7 @@ int main( int argc, char *argv[] ) {
             auto index_graph = new eadlib::WeightedGraph<size_t>( graph_name );
             runner.importFromDB( options.db_name, *index_graph );
             runner.exportToDot( indexed_dot_file, *index_graph );
-            runner.runTarjan( *index_graph );
+            runner.runSuperbubble( *index_graph );
             delete index_graph;
             //Stage 5 - Reconstructing the kmer graph
             auto reconstructed_kmer_graph = new eadlib::WeightedGraph<std::string>( graph_name );
@@ -81,9 +81,9 @@ int main( int argc, char *argv[] ) {
 }
 
 /**
- *
- * @param file_path
- * @return
+ * Extracts the file name from a full path+extension string
+ * @param file_path File path, name and extension
+ * @return File name
  */
 std::string sbp::fileNameExtractor( const std::string &file_path ) {
     std::string name = file_path;

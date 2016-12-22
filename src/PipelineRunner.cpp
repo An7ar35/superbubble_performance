@@ -131,3 +131,13 @@ void sbp::PipelineRunner::importFromDB( const std::string &db_file_name, eadlib:
         std::cout << "           " << graph.size() << " edges in graph." << std::endl;
     }
 }
+
+/**
+ * Runs the superbubble algorithms on the graph
+ * @param graph Graph instance
+ */
+void sbp::PipelineRunner::runSuperbubble( const eadlib::WeightedGraph<size_t> &graph ) {
+    auto writer = eadlib::io::FileWriter( "benchmarks.txt" );
+    auto sb = sbp::algo::SuperBubble( writer );
+    sb.runLinear( graph );
+}
