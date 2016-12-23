@@ -22,30 +22,11 @@ namespace sbp {
           public:
             Tarjan( const eadlib::WeightedGraph<size_t> &graph );
             ~Tarjan();
-            //Iterators
-            typedef std::list<std::list<size_t>>::iterator iterator;
-            typedef std::list<std::list<size_t>>::reverse_iterator reverse_iterator;
-            typedef std::list<std::list<size_t>>::const_iterator const_iterator;
-            typedef std::list<std::list<size_t>>::const_reverse_iterator const_reverse_iterator;
-            iterator begin();
-            iterator end();
-            const_iterator cbegin();
-            const_iterator cend();
-            reverse_iterator rbegin();
-            reverse_iterator rend();
-            const_reverse_iterator rcbegin();
-            const_reverse_iterator rcend();
-            //Modification
-            iterator erase( iterator pos );
-            iterator erase( const_iterator pos );
-            iterator erase( iterator first, iterator last );
-            iterator erase( const_iterator first, const_iterator last );
-            //Properties
-            size_t size() const;
-            bool isEmpty() const;
-            //Sort
-            template<class Comparator> void sort( Comparator comparator );
+            std::unique_ptr<std::list<std::list<size_t>>> findSCCs();
           private:
+            //Type definition
+            typedef std::list<std::list<size_t>> SCCList_t;
+            //Structure definition
             struct Discovery {
                 Discovery( const size_t &index, const size_t &lowest ) :
                     _index( index ),
@@ -56,7 +37,6 @@ namespace sbp {
                 size_t _low_link;
             };
             //Private functions
-            void findSCCs();
             void findSCCs( const size_t &vertex_id,
                            size_t &index,
                            std::unordered_map<size_t, Discovery> &discovery,
@@ -64,16 +44,8 @@ namespace sbp {
                            std::vector<bool> &stackMember );
             //Private variables
             const eadlib::WeightedGraph<size_t> &_graph;
-            std::list<std::list<size_t>> _scc;
+            std::unique_ptr<SCCList_t> _scc;
         };
-
-        /**
-         * Sorts the list of SCCs found
-         * @param comparator Comparator to use for sorting
-         */
-        template<class Comparator> void Tarjan::sort( Comparator comparator ) {
-            _scc.sort( comparator );
-        }
     }
 }
 
