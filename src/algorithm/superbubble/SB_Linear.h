@@ -14,6 +14,9 @@
 #ifndef SUPERBUBBLE_PERFORMANCE_SB_LINEAR_H
 #define SUPERBUBBLE_PERFORMANCE_SB_LINEAR_H
 
+#include <vector>
+#include <memory>
+
 #include <eadlib/datastructure/Graph.h>
 #include <eadlib/datastructure/WeightedGraph.h>
 
@@ -28,7 +31,7 @@ namespace sbp {
             ~SB_Linear();
             bool run( std::list<container::SuperBubble> &superbubble_list );
           private:
-            size_t concatenateSingletonSCCs( sbp::algo::Tarjan &sccs );
+            size_t concatenateSingletonSCCs( std::list<std::list<size_t>> &scc_list );
             const eadlib::WeightedGraph<size_t> _graph;
         };
     }

@@ -19,7 +19,7 @@ sbp::algo::SB_Linear::~SB_Linear() {}
  */
 bool sbp::algo::SB_Linear::run( std::list<container::SuperBubble> &superbubble_list ) {
     //TODO
-    auto strongly_connected_components = std::make_unique<Tarjan>( Tarjan( _graph ) );
+    auto strongly_connected_components = Tarjan( _graph ).findSCCs();
     auto singletonSCC_count            = concatenateSingletonSCCs( *strongly_connected_components );
     auto subGraphs_count               = strongly_connected_components->size();
     auto subGraphs                     = std::vector<std::unique_ptr<eadlib::Graph<size_t>>>();
@@ -38,20 +38,20 @@ bool sbp::algo::SB_Linear::run( std::list<container::SuperBubble> &superbubble_l
 
 /**
  * Concatenate all singletons sccs found in the graph into the first list of SCCs in the Tarjan instance
- * @param sccs Tarjan instance
+ * @param scc_list Tarjan instance
  * @return Number of singletons found
  */
-size_t sbp::algo::SB_Linear::concatenateSingletonSCCs( sbp::algo::Tarjan &sccs ) {
+size_t sbp::algo::SB_Linear::concatenateSingletonSCCs( std::list<std::list<size_t>> &scc_list ) {
     size_t count { 0 };
-    auto first = sccs.begin();
-    auto next  = sccs.begin();
-    if( first != sccs.end() && sccs.size() > 1 ) {
+    auto first = scc_list.begin();
+    auto next  = scc_list.begin();
+    if( first != scc_list.end() && scc_list.size() > 1 ) {
         if( first->size() == 1 ) {
             next++;
             count++;
-            while( next != sccs.end() && next->size() == 1 ) {
+            while( next != scc_list.end() && next->size() == 1 ) {
                 first->emplace_back( next->front() );
-                next = sccs.erase( next );
+                next = scc_list.erase( next );
                 count++;
             }
         }
