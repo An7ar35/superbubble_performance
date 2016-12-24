@@ -97,7 +97,7 @@ and the Kmer index table '_kmers_1_'.
 
 The ````algo::SB_Driver```` acts as a gateway to the implemented SuperBubble algorithms. 
 An ````eadlib::WeightedGraph<size_t>```` describing an indexed 
-[deBruijn graph](#http://www.homolog.us/Tutorials/index.php?p=2.1&s=1) (essentially a bi-directional multi-graph)
+[deBruijn graph](http://www.homolog.us/Tutorials/index.php?p=2.1&s=1) (essentially a bi-directional multi-graph)
 is passed onto the algorithm(s) selected during runtime.
 
 
@@ -118,14 +118,14 @@ working examples with explanations (with pics!) for each of the algorithms cover
 
 ##### a) Finding Strongly Connected Components in the graph
 
-All [SCCs](#https://en.wikipedia.org/wiki/Strongly_connected_component) are found in the graph using 
-[Tarjan's algorithm](#https://en.wikipedia.org/wiki/Tarjan's_strongly_connected_components_algorithm) 
+All [SCCs](https://en.wikipedia.org/wiki/Strongly_connected_component) are found in the graph using 
+[Tarjan's algorithm](https://en.wikipedia.org/wiki/Tarjan's_strongly_connected_components_algorithm) 
 and returned in the form of ````std::list<std::list<size_t>```` where each 
 ````std::list<size_t>```` is a set of 1 or more node ID(s) from the graph that makes up an SCC.
 
 //TODO SCCs found pic
 
-All [singleton](#https://en.wikipedia.org/wiki/Singleton_(mathematics)) SCCs in the list
+All [singleton](https://en.wikipedia.org/wiki/Singleton_(mathematics)) SCCs in the list
 (i.e.: an SCC with just 1 node) are combined as a single set.
 
 //TODO SCCs with combined singleton pic
@@ -147,13 +147,13 @@ All [singleton](#https://en.wikipedia.org/wiki/Singleton_(mathematics)) SCCs in 
 __Linear time superbubble identification based on:__ <a name="cite-linear"></a>
 
 L. Brankovic, C. S. Iliopoulos, R. Kundu, M. Mohamed, S. P. Pissis, F. Vayani, 
-"[Linear-Time Superbubble Identification Algorithm for Genome Assembly](#http://www.sciencedirect.com/science/article/pii/S0304397515009147)", 
+"[Linear-Time Superbubble Identification Algorithm for Genome Assembly](http://www.sciencedirect.com/science/article/pii/S0304397515009147)", 
 Theoretical Computer Science, 2015.
 
 __Quasi-Linear time superbubble identification based on:__ <a name="cite-qlinear"></a>
  
 Wing-Kin Sung, Kunihiko Sadakane, Tetsuo Shibuya, Abha Belorkar, and Iana Pyrogova, 
-"[An O(_m_ log _m_)-Time Algorithm for Detecting Superbubbles](#http://ieeexplore.ieee.org/document/6998850/?reload=true&arnumber=6998850)",
+"[An O(_m_ log _m_)-Time Algorithm for Detecting Superbubbles](http://ieeexplore.ieee.org/document/6998850/?reload=true&arnumber=6998850)",
 IEEE/ACM Transactions on Computational Biology and Bioinformatics, Vol. 12, No. 4, July/August 2015
 
 
