@@ -4,22 +4,25 @@ Test of the different super-bubble identifications algorithms in
 genome sequencing
 
 ## Table of Contents
-1. [Basic architecture diagram](#basic-architecture-diagram)
-    1. [Description](#arch-description)
+1. [Basic Pipeline flow](#basic-architecture-diagram)
 2. [Graph construction example](#graph-construction-example)
     1. [Generated graphs](#generated-graphs)
     2. [Generated DB Tables](#generated-tables)
 3. [Superbubble Algorithms](#superbubble-algorithms)
+    1. [Linear time SuperBubble identification](#linear-algo)
+    2. [Quasi-linear time SuperBubble identification](#qlinear-algo)
+    3. [Quadratic time SuperBubble identification](#quadratic-algo)
+4. [Citations](#citations)
 5. [Platforms Supported](#platforms-supported)
 6. [License](#license)
 
 
 ---
-## Basic Pipeline Architecture <a name="basic-architecture-diagram"></a>
+## Basic Pipeline Flow <a name="basic-architecture-diagram"></a>
 
 ![Basic architecture diagram](docs/resources/uml/basic_pipeline.png "Basic overview")
 
-### Description <a name="arch-description"></a>
+__Description__
 
 - FASTA formatted sequencer reads get parsed into the GraphConstructor.
 - The GraphConstructor create the graph from the reads and a K-mer length provided.
@@ -27,7 +30,10 @@ genome sequencing
   where possible.
 - The GraphIndexer creates an index of all the K-mers (nodes) in the graph and
   constructs a indexed WeightedGraph equivalent of the K-mer string graph.
-- The GraphInexer sends the indexed K-mers and indexed Edges to the database for storage.
+- The GraphIndexer sends the indexed K-mers and indexed Edges to the database for storage.
+- The GraphIndexer sends the indexed graph to the SuperBubble algorithm driver class.
+- The SuperBubble driver saves the identified SuperBubbles in the graph to the Database.
+- Optionally benchmarks for the SuperBubble algorithms are written to a file.
 - Optionally both kmer graphs and indexed graph can be exported to Dot format.
 
 
@@ -85,15 +91,67 @@ and the Kmer index table '_kmers_1_'.
 ---
 ## Superbubble Algorithms <a name="superbubble-algorithms"></a>
 
-//TODO
+Unto whom that wish not their time wasted and their sanity tested with the 
+translation of the linguistic bullshit of academia: I present to thee step-by-step
+working examples with explanations (with pics!) for each of the algorithms covered...
+
+//TODO pic of example graph that is used
+
+### Linear time SuperBubble identification <a name="linear-algo"></a>
+
+#### Stage 1: Preparation
+
+##### a) Finding Strongly Connected Components in the graph
+
+All SCCs are found in the graph using 
+[Tarjan's algorithm](#https://en.wikipedia.org/wiki/Tarjan's_strongly_connected_components_algorithm) 
+and returned in the form of ````std::list<std::list<size_t>```` where each 
+````std::list<size_t>```` is a set of 1 or more node ID(s) from the graph that makes up an SCC.
+
+//TODO SCCs found pic
+
+All singleton SCCs in the list (SCC composed of just 1 node) are combined
+ as a single set.
+
+//TODO SCCs with combined singleton pic
+
+##### b) Partitioning the graph
+
+
+
+### Quasi-linear time SuperBubble identification <a name="qlinear-algo"></a>
+
+
+
+### Quadratic time SuperBubble identification <a name="quadratic-algo"></a>
+
+
+---
+## Citations <a name="citations"></a>
+
+__Linear time superbubble identification based on:__ <a name="cite-linear"></a>
+
+L. Brankovic, C. S. Iliopoulos, R. Kundu, M. Mohamed, S. P. Pissis, F. Vayani, 
+"Linear-Time Superbubble Identification Algorithm for Genome Assembly", 
+Theoretical Computer Science, 2015.
+
+__Quasi-Linear time superbubble identification based on:__ <a name="cite-qlinear"></a>
+ 
+Wing-Kin Sung, Kunihiko Sadakane, Tetsuo Shibuya, Abha Belorkar, and Iana Pyrogova, 
+"An O(_m_ log _m_)-Time Algorithm for Detecting Superbubbles"
+IEEE/ACM Transactions on Computational Biology and Bioinformatics, Vol. 12, No. 4, July/August 2015
+
+
+//TODO cite the papers for the algos used (quadratic)
+
 
 ---
 ## Platforms supported <a name="platforms-supported"></a>
 
-The software is bundled with the components required from the EADlib library.
+The software is bundled with components belonging to the "EADlib" library.
 
 ### Linux ツ ###
-- Need a version of GCC with C++14 support (made with GCC 6.2.1)
+- Need a version of GCC/Clang with C++14 support (made with GCC 6.2.1)
 - CMake 3.5
 
 ### Mac OSX ###
@@ -103,11 +161,11 @@ The software is bundled with the components required from the EADlib library.
  
 ### Windows ###
 
-- Nope.
+- You are on your own.
 
 ---
 ## License <a name="license"></a>
 
 This software is released under the [__GNU General Public License 2__](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html) license.
 
-Please reference when used in project and/or research.
+Please reference when used in project and/or research and/or papers and/or integrated in production code (i.e.: DBAD).
