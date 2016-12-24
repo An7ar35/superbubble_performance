@@ -105,6 +105,8 @@ is passed onto the algorithm(s) selected during runtime.
 _Unto whom that wish not their time wasted and their sanity tested with the 
 translation of the linguistic bullshit of academia: I present to thee step-by-step
 working examples with explanations (with pics!) for each of the algorithms covered..._
+
+
 ---
 
 
