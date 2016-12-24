@@ -1,0 +1,21 @@
+@startuml
+
+package eadlib {
+    [WeightedGraph<T>]
+}
+
+package sbp {
+    [algo::SB_Driver]
+    [algo::SB_Linear]
+    [algo::SB_QLinear]
+    [algo::SB_Quadratic]
+    '[algo::Tarjan]
+
+    [algo::SB_Driver] -down-> [algo::SB_Linear]
+    [algo::SB_Driver] -down-> [algo::SB_QLinear]
+    [algo::SB_Driver] -down-> [algo::SB_Quadratic]
+    '[algo::SB_Linear] -down-o [algo::Tarjan]
+    '[algo::SB_QLinear] -down-o [algo::Tarjan]
+}
+
+@enduml

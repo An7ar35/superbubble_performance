@@ -1,3 +1,5 @@
+### -------Note: Under construction--------
+
 # Superbubble Performance 
 
 Test of the different super-bubble identifications algorithms in 
@@ -91,9 +93,20 @@ and the Kmer index table '_kmers_1_'.
 ---
 ## Superbubble Algorithms <a name="superbubble-algorithms"></a>
 
-Unto whom that wish not their time wasted and their sanity tested with the 
+![Basic architecture diagram](docs/resources/uml/super_bubble.png "Basic overview")
+
+The ````algo::SB_Driver```` acts as a gateway to the implemented SuperBubble algorithms. 
+An ````eadlib::WeightedGraph<size_t>```` describing an indexed 
+[deBruijn graph](#http://www.homolog.us/Tutorials/index.php?p=2.1&s=1) (essentially a bi-directional multi-graph)
+is passed onto the algorithm(s) selected during runtime.
+
+
+---
+_Unto whom that wish not their time wasted and their sanity tested with the 
 translation of the linguistic bullshit of academia: I present to thee step-by-step
-working examples with explanations (with pics!) for each of the algorithms covered...
+working examples with explanations (with pics!) for each of the algorithms covered..._
+---
+
 
 //TODO pic of example graph that is used
 
@@ -103,15 +116,15 @@ working examples with explanations (with pics!) for each of the algorithms cover
 
 ##### a) Finding Strongly Connected Components in the graph
 
-All SCCs are found in the graph using 
+All [SCCs](#https://en.wikipedia.org/wiki/Strongly_connected_component) are found in the graph using 
 [Tarjan's algorithm](#https://en.wikipedia.org/wiki/Tarjan's_strongly_connected_components_algorithm) 
 and returned in the form of ````std::list<std::list<size_t>```` where each 
 ````std::list<size_t>```` is a set of 1 or more node ID(s) from the graph that makes up an SCC.
 
 //TODO SCCs found pic
 
-All singleton SCCs in the list (SCC composed of just 1 node) are combined
- as a single set.
+All [singleton](#https://en.wikipedia.org/wiki/Singleton_(mathematics)) SCCs in the list
+(i.e.: an SCC with just 1 node) are combined as a single set.
 
 //TODO SCCs with combined singleton pic
 
@@ -132,13 +145,13 @@ All singleton SCCs in the list (SCC composed of just 1 node) are combined
 __Linear time superbubble identification based on:__ <a name="cite-linear"></a>
 
 L. Brankovic, C. S. Iliopoulos, R. Kundu, M. Mohamed, S. P. Pissis, F. Vayani, 
-"Linear-Time Superbubble Identification Algorithm for Genome Assembly", 
+"[Linear-Time Superbubble Identification Algorithm for Genome Assembly](#http://www.sciencedirect.com/science/article/pii/S0304397515009147)", 
 Theoretical Computer Science, 2015.
 
 __Quasi-Linear time superbubble identification based on:__ <a name="cite-qlinear"></a>
  
 Wing-Kin Sung, Kunihiko Sadakane, Tetsuo Shibuya, Abha Belorkar, and Iana Pyrogova, 
-"An O(_m_ log _m_)-Time Algorithm for Detecting Superbubbles"
+"[An O(_m_ log _m_)-Time Algorithm for Detecting Superbubbles](#http://ieeexplore.ieee.org/document/6998850/?reload=true&arnumber=6998850)",
 IEEE/ACM Transactions on Computational Biology and Bioinformatics, Vol. 12, No. 4, July/August 2015
 
 
