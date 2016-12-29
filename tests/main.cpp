@@ -1,7 +1,9 @@
+#include "Tarjan_test.h"
+
 #include "gtest/gtest.h"
 
-//TODO unit tests!
 
+//TODO unit tests
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

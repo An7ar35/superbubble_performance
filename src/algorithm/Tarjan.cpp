@@ -109,3 +109,26 @@ void sbp::algo::Tarjan::findSCCs( const size_t &vertex_id,
         }
     }
 }
+
+/**
+ * Concatenate all singletons SCCs into the first list of SCCs passed
+ * @param scc_list List of SCCs
+ * @return Number of singletons found
+ */
+size_t sbp::algo::Tarjan::concatenateSingletonSCCs( std::list<std::list<size_t>> &scc_list ) {
+    size_t count { 0 };
+    auto first = scc_list.begin();
+    auto next  = scc_list.begin();
+    if( first != scc_list.end() && scc_list.size() > 1 ) {
+        if( first->size() == 1 ) {
+            next++;
+            count++;
+            while( next != scc_list.end() && next->size() == 1 ) {
+                first->emplace_back( next->front() );
+                next = scc_list.erase( next );
+                count++;
+            }
+        }
+    }
+    return count;
+}
