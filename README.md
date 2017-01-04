@@ -111,7 +111,9 @@ working examples with explanations (inc pics!) for each of the algorithms covere
 
 //TODO pic of example graph that is used
 
-### Linear time SuperBubble identification <a name="linear-algo"></a>
+### Quadratic time SuperBubble identification <a name="quadratic-algo"></a>
+
+### Quasi-linear time SuperBubble identification <a name="qlinear-algo"></a>
 
 #### Stage 1: Preparation
 
@@ -132,12 +134,8 @@ All [singleton](https://en.wikipedia.org/wiki/Singleton_(mathematics)) SCCs in t
 ##### b) Partitioning the graph
 
 
+### Linear time SuperBubble identification <a name="linear-algo"></a>
 
-### Quasi-linear time SuperBubble identification <a name="qlinear-algo"></a>
-
-
-
-### Quadratic time SuperBubble identification <a name="quadratic-algo"></a>
 
 
 ---
