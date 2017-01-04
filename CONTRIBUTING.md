@@ -1,7 +1,7 @@
 I welcome contributions but pull request will _not be considered_ unless:
 
 #### Code 
-1) Code is formatted in the general same general style as the rest,
+1) Code is formatted in the same general style as the rest of the code base,
 2) Code is readable and names are clear to their purpose (i.e. no a,b,c stuff),
 3) Some basic unit testing is implemented at least,
 4) Nothing breaks (i.e. regression testing),
@@ -16,7 +16,7 @@ description at the top (see previous code),
 #### Git commits
 8) Commits are per file/dependency chain (see previous commits to get an idea)
 9) Commit messages are clear and descriptive starting with the full namespace
- of the addition/change in square brackets
+ of the addition/change in square brackets,
 
 #### Other
 10) Any architectural changes need to be discussed prior.
