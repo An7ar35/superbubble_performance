@@ -13,6 +13,7 @@
 #include <eadlib/datastructure/WeightedGraph.h>
 
 #include "SB_Linear.h"
+#include "SB_QLinear.h"
 
 namespace sbp {
     namespace algo {
@@ -21,6 +22,7 @@ namespace sbp {
             SB_Driver( eadlib::io::FileWriter &writer );
             ~SB_Driver();
             void runLinear( const eadlib::WeightedGraph<size_t> &graph, std::list<container::SuperBubble> &sb_list );
+            void runQLinear( const eadlib::WeightedGraph<size_t> &graph, std::list<container::SuperBubble> &sb_list );
           private:
             eadlib::io::FileWriter &_writer;
         };
