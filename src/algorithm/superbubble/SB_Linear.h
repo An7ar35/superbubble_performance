@@ -2,7 +2,9 @@
     @class          sbp::algo::SB_Linear
     @brief          Implementation of the O(n + m) superbubble algorithm
 
-                    //TODO cite here!!
+                    Based on: "Linear-Time Superbubble Identification Algorithm for Genome Assembly"
+                    by L. Brankovic, C. S. Iliopoulos, R. Kundu, M. Mohamed, S. P. Pissis, F. Vayani,
+                    Theoretical Computer Science, 2015.
 
     @dependencies   eadlib::WeightedGraph<T>, eadlib::Graph<T>,
                     sbp::algo::container::SuperBubble, sbp::algo::Tarjan
@@ -31,7 +33,6 @@ namespace sbp {
             ~SB_Linear();
             bool run( std::list<container::SuperBubble> &superbubble_list );
           private:
-            size_t concatenateSingletonSCCs( std::list<std::list<size_t>> &scc_list );
             const eadlib::WeightedGraph<size_t> _graph;
         };
     }
