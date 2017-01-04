@@ -102,9 +102,8 @@ is passed onto the algorithm(s) selected during runtime.
 
 
 ---
-_Unto whom that wish not their time wasted and their sanity tested with the 
-translation of the linguistic bullshit of academia: I present to thee step-by-step
-working examples with explanations (with pics!) for each of the algorithms covered..._
+_Unto whom that is not versed in the linguistic spaghetti of academia: I present to thee step-by-step
+working examples with explanations (inc pics!) for each of the algorithms covered..._
 
 
 ---
@@ -126,7 +125,7 @@ and returned in the form of ````std::list<std::list<size_t>```` where each
 //TODO SCCs found pic
 
 All [singleton](https://en.wikipedia.org/wiki/Singleton_(mathematics)) SCCs in the list
-(i.e.: an SCC with just 1 node) are combined as a single set.
+(i.e.: any SCC with just 1 node) are combined as a single set.
 
 //TODO SCCs with combined singleton pic
 
