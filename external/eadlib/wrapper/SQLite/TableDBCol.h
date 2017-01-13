@@ -9,7 +9,7 @@
 #ifndef EADLIB_TABLEDBCOL_H
 #define EADLIB_TABLEDBCOL_H
 
-#include "../../logger/Logger.h"
+#include "eadlib/logger/Logger.h"
 #include "TableDBCell.h"
 
 namespace eadlib {

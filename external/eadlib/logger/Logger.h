@@ -46,6 +46,10 @@ namespace eadlib {
           public:
             Logger();
             ~Logger();
+            Logger( const Logger &logger ) = delete;
+            Logger( Logger &&logger ) = delete;
+            Logger & operator =( const Logger &rhs ) = delete;
+            Logger & operator =( Logger &&rhs ) = delete;
             //Logging
             template<eadlib::log::LogLevel_types::Type event_type, typename...Args> void print( Args...args );
             template<eadlib::log::LogLevel_types::Type event_type> void print_();
@@ -111,7 +115,7 @@ namespace eadlib {
         inline std::string Logger::getEntryNumber() {
             std::stringstream ss;
             ss.fill( '0' );
-            ss.width( 7 );
+            ss.width( 9 );
             ss << this->_number_of_entries;
             return ss.str();
         }

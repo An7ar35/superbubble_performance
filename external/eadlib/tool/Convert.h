@@ -18,8 +18,8 @@
 #include <sstream>
 #include <typeinfo>
 
-#include "../logger/Logger.h"
-#include "../math/math.h"
+#include "eadlib/logger/Logger.h"
+#include "eadlib/math/math.h"
 
 namespace eadlib {
     namespace tool {

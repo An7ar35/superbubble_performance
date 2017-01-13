@@ -14,7 +14,7 @@
 #include <string>
 #include <memory>
 #include <istream>
-#include "../../logger/Logger.h"
+#include "eadlib/logger/Logger.h"
 #include "sqlite3/sqlite3.h"
 #include "TableDB.h"
 

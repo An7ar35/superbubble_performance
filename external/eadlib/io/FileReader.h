@@ -17,7 +17,7 @@
 #include <fstream>
 #include <memory>
 #include <errno.h>
-#include "../logger/Logger.h"
+#include "eadlib/logger/Logger.h"
 
 namespace eadlib {
     namespace io {

@@ -24,8 +24,8 @@
 #include <list>
 #include <unordered_map>
 
-#include "../logger/Logger.h"
-#include "../exception/corruption.h"
+#include "eadlib/logger/Logger.h"
+#include "eadlib/exception/corruption.h"
 
 namespace eadlib {
     template<class T> class Graph {

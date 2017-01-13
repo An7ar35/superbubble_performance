@@ -13,7 +13,7 @@
 #include <math.h>
 #include <utility>
 
-#include "../../logger/Logger.h"
+#include "eadlib/logger/Logger.h"
 
 namespace eadlib {
     class TableDBCell {
