@@ -100,15 +100,6 @@ An ````eadlib::WeightedGraph<size_t>```` describing an indexed
 [deBruijn graph](http://www.homolog.us/Tutorials/index.php?p=2.1&s=1) (essentially a bi-directional multi-graph)
 is passed onto the algorithm(s) selected during runtime.
 
-
----
-_Unto whom that is not versed in the linguistic spaghetti of academia: I present to thee step-by-step
-working examples with explanations (inc pics!) for each of the algorithms covered..._
-
-
----
-
-
 //TODO pic of example graph that is used
 
 ### Quadratic time SuperBubble identification <a name="quadratic-algo"></a>
