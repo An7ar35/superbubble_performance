@@ -9,7 +9,6 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build/")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build/")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build/")
 
-include_directories(include)
 include_directories(external)
 
 set(SOURCE_FILES
@@ -35,7 +34,12 @@ set(SOURCE_FILES
         src/algorithm/superbubble/SB_Driver.cpp
         src/algorithm/superbubble/SB_Driver.h
         src/algorithm/superbubble/SB_Linear.cpp
-        src/algorithm/superbubble/SB_Linear.h src/algorithm/superbubble/container/SuperBubble.h)
+        src/algorithm/superbubble/SB_Linear.h
+        src/algorithm/superbubble/container/SuperBubble.h
+        src/graph/SubGraph.cpp
+        src/graph/SubGraph.h
+        src/algorithm/superbubble/SB_QLinear.cpp
+        src/algorithm/superbubble/SB_QLinear.h)
 
 set(SQLITE3_FILES
         external/sqlite3/sqlite3.h
@@ -62,7 +66,8 @@ if( GTEST_FOUND )
     include_directories(${GTEST_INCLUDE_DIRS})
 
     set(TEST_FILES
-            tests/main.cpp tests/main.cpp)
+            tests/main.cpp
+            tests/Tarjan_test.h)
 
     add_executable(
             sbp_tests
