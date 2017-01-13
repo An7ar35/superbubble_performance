@@ -4,6 +4,7 @@
 #include "eadlib/io/FileWriter.h"
 #include "eadlib/logger/Logger.h"
 #include "eadlib/datastructure/WeightedGraph.h"
+#include "../graph/SubGraph.h"
 
 namespace sbp {
     namespace io {
@@ -15,6 +16,8 @@ namespace sbp {
             bool exportToDot( const std::string &graph_name,
                               const eadlib::WeightedGraph<T> &graph,
                               const bool &weight_label );
+            bool exportToDot( const std::string &graph_name,
+                              const sbp::graph::SubGraph &sub_graph );
           private:
             eadlib::io::FileWriter &_writer;
         };
@@ -43,8 +46,8 @@ namespace sbp {
          * @return Success
          */
         template<class T> bool DotExport<T>::exportToDot( const std::string &graph_name,
-                                                       const eadlib::WeightedGraph<T> &graph,
-                                                       const bool &weight_label ) {
+                                                          const eadlib::WeightedGraph<T> &graph,
+                                                          const bool &weight_label ) {
             if( !_writer.isOpen() && !_writer.open() ) {
                 LOG_ERROR( "[sbp::io::DotExport::exportToDot(..)] Could not open file '", _writer.getFileName(), "'." );
                 return false;
@@ -65,7 +68,7 @@ namespace sbp {
                                 << " -> "
                                 << dest
                                 << " [label=\""
-                                <<  std::to_string( node.second.weight.at( dest ) )
+                                <<  node.second.weight.at( dest )
                                 << "\"]\n";
                             _writer.write( oss.str() );
                         } else { //shows every duplicate edges
@@ -80,6 +83,17 @@ namespace sbp {
             }
             _writer.write( "}" );
             return true;
+        }
+
+        /**
+         * Exports the subgraph to a Dot file
+         * @param graph_name Name of the sub-graph
+         * @param sub_graph  SubGraph instance
+         * @return Success
+         */
+        bool DotExport::exportToDot( const std::string &graph_name, const sbp::graph::SubGraph &sub_graph ) {
+            //TODO
+            return false;
         }
     }
 }
