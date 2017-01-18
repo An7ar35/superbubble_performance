@@ -1,4 +1,5 @@
 #include "Tarjan_test.h"
+#include "SubGraph_test.h"
 
 #include "gtest/gtest.h"
 
