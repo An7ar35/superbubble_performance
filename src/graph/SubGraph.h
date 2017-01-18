@@ -2,6 +2,7 @@
 #define SUPERBUBBLE_PERFORMANCE_SUBGRAPH_H
 
 #include <vector>
+#include <iterator>
 #include <eadlib/datastructure/Graph.h>
 #include <eadlib/datastructure/WeightedGraph.h>
 
@@ -11,7 +12,7 @@ namespace sbp {
           public:
             SubGraph( const eadlib::WeightedGraph<size_t> &base_graph,
                       const std::list<size_t> &scc,
-                      const std::string &subGraph_name = "subgraph" );
+                      const std::string &subGraph_name );
             ~SubGraph();
             //Iterator
             typedef eadlib::Graph<size_t>::Graph_t::const_iterator const_iterator;
@@ -27,12 +28,17 @@ namespace sbp {
             //State
             size_t size() const;
             size_t nodeCount() const;
-
+            //Print
+            std::ostream & printLocal( std::ostream &out );
+            std::ostream & printGlobal( std::ostream &out );
 
           private:
-            eadlib::Graph<size_t> _sub_graph;
-            std::vector<size_t> _node_map;
-            size_t _edge_count;
+            eadlib::Graph<size_t>              _sub_graph;
+            std::unordered_map<size_t, size_t> _local2global_map; //local to global ID lookup
+            std::unordered_map<size_t, size_t> _global2local_map; //reverse ID lookup
+            size_t                             _entrance_node;    // r
+            size_t                             _exit_node;        // r'
+            std::string                        _name;
         };
     }
 }
