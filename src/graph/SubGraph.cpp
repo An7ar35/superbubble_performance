@@ -142,11 +142,19 @@ size_t sbp::graph::SubGraph::nodeCount() const {
 }
 
 /**
+ * Gets the name of the SubGraph
+ * @return SubGraph name
+ */
+std::string sbp::graph::SubGraph::getName() const {
+    return _name;
+}
+
+/**
  * Prints the SubGraph with local IDs
  * @param out Output stream
  * @return Output stream
  */
-std::ostream &sbp::graph::SubGraph::printLocal( std::ostream &out ) {
+std::ostream &sbp::graph::SubGraph::printLocal( std::ostream &out ) const {
     return _sub_graph.printAdjacencyList( out );
 }
 
@@ -155,7 +163,7 @@ std::ostream &sbp::graph::SubGraph::printLocal( std::ostream &out ) {
  * @param out Output stream
  * @return Output stream
  */
-std::ostream &sbp::graph::SubGraph::printGlobal( std::ostream &out ) {
+std::ostream &sbp::graph::SubGraph::printGlobal( std::ostream &out ) const {
     for( auto it = _sub_graph.begin(); it != _sub_graph.end(); ++it ) {
         if( it->first == _entrance_node ) {
             out << "[r] -> ";

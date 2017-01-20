@@ -28,9 +28,10 @@ namespace sbp {
             //State
             size_t size() const;
             size_t nodeCount() const;
+            std::string getName() const;
             //Print
-            std::ostream & printLocal( std::ostream &out );
-            std::ostream & printGlobal( std::ostream &out );
+            std::ostream & printLocal( std::ostream &out ) const;
+            std::ostream & printGlobal( std::ostream &out ) const;
 
           private:
             eadlib::Graph<size_t>              _sub_graph;
