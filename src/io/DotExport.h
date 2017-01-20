@@ -93,11 +93,11 @@ namespace sbp {
         template<class T> bool DotExport<T>::exportToDot( const sbp::graph::SubGraph &sub_graph ) {
             auto getRealID = [&]( const size_t &local_id ) {
                 if( local_id == sub_graph.getSourceID() ) {
-                    return "r";
+                    return std::string( "r" );
                 } else if( local_id == sub_graph.getTerminalID() ) {
-                    return "r\'";
+                    return std::string( "r\'" );
                 } else {
-                    return std::to_string( sub_graph.getGlobalID( local_id ) ).c_str();
+                    return std::to_string( sub_graph.getGlobalID( local_id ) );
                 }
             };
 
@@ -111,15 +111,15 @@ namespace sbp {
             for( auto it = sub_graph.begin(); it != sub_graph.end(); ++it ) {
                 if( it->second.childrenList.empty() && it->second.parentsList.empty() ) {
                     std::ostringstream oss;
-                    oss << "\t\"" << getRealID( it->first ) << "\";\n";
+                    oss << "\t\"" << getRealID( it->first ).c_str() << "\";\n";
                     _writer.write( oss.str() );
                 } else {
                     for( auto dest : it->second.childrenList ) {
                         std::ostringstream oss;
                         oss << "\t\""
-                            << getRealID( it->first )
+                            << getRealID( it->first ).c_str()
                             << "\" -> \""
-                            << getRealID( dest )
+                            << getRealID( dest ).c_str()
                             << "\"\n";
                         _writer.write( oss.str() );
                     }
