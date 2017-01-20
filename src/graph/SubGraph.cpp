@@ -16,7 +16,6 @@ sbp::graph::SubGraph::SubGraph( const eadlib::WeightedGraph<size_t> &base_graph,
     size_t local_id { 1 };
     for( auto v : scc ) {
         _sub_graph.addNode( local_id );
-        std::cout << "Global: " << v << ", Local: " << local_id << std::endl;
         _local2global_map.emplace( std::make_pair( local_id, v ) );
         _global2local_map.emplace( std::make_pair( v, local_id ) );
         local_id++;
