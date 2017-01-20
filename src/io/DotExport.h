@@ -16,8 +16,7 @@ namespace sbp {
             bool exportToDot( const std::string &graph_name,
                               const eadlib::WeightedGraph<T> &graph,
                               const bool &weight_label );
-            bool exportToDot( const std::string &graph_name,
-                              const sbp::graph::SubGraph &sub_graph );
+            bool exportToDot( const sbp::graph::SubGraph &sub_graph );
           private:
             eadlib::io::FileWriter &_writer;
         };
@@ -91,9 +90,43 @@ namespace sbp {
          * @param sub_graph  SubGraph instance
          * @return Success
          */
-        bool DotExport::exportToDot( const std::string &graph_name, const sbp::graph::SubGraph &sub_graph ) {
-            //TODO
-            return false;
+        template<class T> bool DotExport<T>::exportToDot( const sbp::graph::SubGraph &sub_graph ) {
+            auto getRealID = [&]( const size_t &local_id ) {
+                if( local_id == sub_graph.getSourceID() ) {
+                    return "r";
+                } else if( local_id == sub_graph.getTerminalID() ) {
+                    return "r\'";
+                } else {
+                    return std::to_string( sub_graph.getGlobalID( local_id ) ).c_str();
+                }
+            };
+
+            if( !_writer.isOpen() && !_writer.open() ) {
+                LOG_ERROR( "[sbp::io::DotExport::exportToDot(..)] Could not open file '", _writer.getFileName(), "'." );
+                return false;
+            }
+
+            _writer.write( "digraph " + sub_graph.getName() + " {\n" );
+            _writer.write( "\tnode [shape = circle]\n" );
+            for( auto it = sub_graph.begin(); it != sub_graph.end(); ++it ) {
+                if( it->second.childrenList.empty() && it->second.parentsList.empty() ) {
+                    std::ostringstream oss;
+                    oss << "\t\"" << getRealID( it->first ) << "\";\n";
+                    _writer.write( oss.str() );
+                } else {
+                    for( auto dest : it->second.childrenList ) {
+                        std::ostringstream oss;
+                        oss << "\t\""
+                            << getRealID( it->first )
+                            << "\" -> \""
+                            << getRealID( dest )
+                            << "\"\n";
+                        _writer.write( oss.str() );
+                    }
+                }
+            }
+            _writer.write( "}" );
+            return true;
         }
     }
 }
