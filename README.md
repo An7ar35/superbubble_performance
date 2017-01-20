@@ -104,6 +104,8 @@ is passed onto the algorithm(s) selected during runtime.
 
 ### Quadratic time SuperBubble identification <a name="quadratic-algo"></a>
 
+//TODO
+
 ### Quasi-linear time SuperBubble identification <a name="qlinear-algo"></a>
 
 #### Stage 1: Preparation
@@ -111,18 +113,39 @@ is passed onto the algorithm(s) selected during runtime.
 ##### a) Finding Strongly Connected Components in the graph
 
 All [SCCs](https://en.wikipedia.org/wiki/Strongly_connected_component) are found in the graph using 
-[Tarjan's algorithm](https://en.wikipedia.org/wiki/Tarjan's_strongly_connected_components_algorithm) 
-and returned in the form of ````std::list<std::list<size_t>```` where each 
-````std::list<size_t>```` is a set of 1 or more node ID(s) from the graph that makes up an SCC.
+[Tarjan's algorithm](https://en.wikipedia.org/wiki/Tarjan's_strongly_connected_components_algorithm). 
+
+> __Implementation notes:__
+>
+> The SCCs are returned in the form of `std::list<std::list<size_t>` where each
+> `std::list<size_t>` is a set of 1 or more node ID(s) from the graph that makes 
+> up an SCC.
+>
+> All [singleton](https://en.wikipedia.org/wiki/Singleton_(mathematics)) SCCs in
+> the list (i.e.: any SCC with just 1 node) are combined as a single set.|
+
 
 //TODO SCCs found pic
-
-All [singleton](https://en.wikipedia.org/wiki/Singleton_(mathematics)) SCCs in the list
-(i.e.: any SCC with just 1 node) are combined as a single set.
 
 //TODO SCCs with combined singleton pic
 
 ##### b) Partitioning the graph
+
+The graph is partitioned into sub-graphs based on the SCCs found.
+
+> __Implementation notes:__
+>
+> The graph is partitioned by passing each `std::list<size_t>` SCCs to a 
+> `sbp::graph::SubGraph` constructor which recreates the graph portion to be
+> partitioned and adds the required entrance and exit nodes (__r__ and __r'__)
+> with the edges to it.
+>
+> Each `SubGraph` is stored on the heap using a list of `std::unique_ptr<graph::SubGraph>`.
+> (`std::list<std::unique_ptr<graph::SubGraph>>`)
+
+
+##### c) 
+
 
 
 ### Linear time SuperBubble identification <a name="linear-algo"></a>
