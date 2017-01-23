@@ -21,24 +21,10 @@ sbp::algo::SB_QLinear::~SB_QLinear() {}
  */
 bool sbp::algo::SB_QLinear::run( std::list<sbp::algo::container::SuperBubble> &superbubble_list ) {
     //Find SCCs
-    auto found_SCCs         = Tarjan( _graph ).findSCCs();
-    auto singletonSCC_count = Tarjan::concatenateSingletonSCCs( *found_SCCs );
-
+    auto found_SCCs = Tarjan( _graph ).findSCCs();
     //Partition graph into sub-graphs
-    auto sub_graphs = algo::PartitionGraph();
-    size_t sg_count { 0 };
-    auto it = found_SCCs->begin();
-    if( it != found_SCCs->end() ) { //Singleton SCCs
-        sub_graphs.partitionSingletonSCCs( _graph, *it, std::string( "SubGraph" + sg_count ) );
-        sg_count++;
-    }
-    for( auto it = std::next( it ); it != found_SCCs->end(); ++it) { //All the other SCCs
-        sub_graphs.partitionSCC( _graph, *it, std::string( "SubGraph" + sg_count ) );
-        sg_count++;
-    }
+    auto sub_graphs = PartitionGraph().partitionSCCs( _graph, *found_SCCs, "SubGraph" );
     found_SCCs.reset(); //no longer needed so early destruction to free up memory
-
-
 
 
     return false;
