@@ -17,32 +17,22 @@ namespace sbp {
         class PartitionGraph {
           public:
             PartitionGraph();
-            PartitionGraph( const PartitionGraph& ) = delete;
-            PartitionGraph( PartitionGraph &&p );
             ~PartitionGraph();
-            //Operator
-            PartitionGraph & operator =( const PartitionGraph & ) = delete;
-            PartitionGraph & operator =( PartitionGraph &&p );
-            //Iterators
-            typedef std::list<graph::SubGraph>::iterator iterator;
-            typedef std::list<graph::SubGraph>::const_iterator const_iterator;
-            iterator begin();
-            iterator end();
-            const_iterator cbegin();
-            const_iterator cend();
-            //Partition algo functions
-            iterator partitionSCC( const eadlib::WeightedGraph<size_t> &base_graph,
-                                   const std::list<size_t> &scc,
-                                   const std::string &subGraph_name );
-            iterator partitionSingletonSCCs( const eadlib::WeightedGraph<size_t> &base_graph,
-                                             const std::list<size_t> &scc,
-                                             const std::string &subGraph_name );
-            //State
-            bool empty() const;
-            size_t size() const;
+            //Type definition
+            typedef std::list<graph::SubGraph> SubGraphList_t;
+            //Partitioning method
+            std::unique_ptr<SubGraphList_t> partitionSCCs( const eadlib::WeightedGraph<size_t> &base_graph,
+                                                           const std::list<std::list<size_t>> &scc_lists,
+                                                           const std::string &sb_name_prefix );
 
           private:
-            std::unique_ptr<std::list<graph::SubGraph>> _sub_graphs;
+            void partitionSCC( const eadlib::WeightedGraph<size_t> &base_graph,
+                               const std::list<size_t> &scc,
+                               const std::string &subGraph_name );
+            void partitionSingletonSCCs( const eadlib::WeightedGraph<size_t> &base_graph,
+                                         const std::list<size_t> &scc,
+                                         const std::string &subGraph_name );
+            std::unique_ptr<SubGraphList_t> _sub_graphs;
         };
     }
 }

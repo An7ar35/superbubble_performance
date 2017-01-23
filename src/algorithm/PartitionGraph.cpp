@@ -3,17 +3,7 @@
 /**
  * Constructor
  */
-sbp::algo::PartitionGraph::PartitionGraph() :
-    _sub_graphs( std::make_unique<std::list<graph::SubGraph>>() )
-{}
-
-/**
- * Move-constructor
- * @param p PartitionGraph instance to move over
- */
-sbp::algo::PartitionGraph::PartitionGraph( sbp::algo::PartitionGraph &&p ) :
-    _sub_graphs( std::move( p._sub_graphs ) )
-{}
+sbp::algo::PartitionGraph::PartitionGraph() {}
 
 /**
  * Destructor
@@ -21,12 +11,27 @@ sbp::algo::PartitionGraph::PartitionGraph( sbp::algo::PartitionGraph &&p ) :
 sbp::algo::PartitionGraph::~PartitionGraph() {}
 
 /**
- * Move assignment operator
- * @param p PartitionGraph instance to move over
- * @return PartitionGraph
+ * Partitions a graph into SubGraphs based on a list of SCCs
+ * @param base_graph     Base graph (global) from which to partition off
+ * @param scc_lists      Complete list if SCCs (where first list is a concatenate of all singleton SCCs found)
+ * @param sb_name_prefix SubGraph name prefix
+ * @return List of all SubGraphs created
  */
-sbp::algo::PartitionGraph & sbp::algo::PartitionGraph::operator =( sbp::algo::PartitionGraph &&p ) {
-    _sub_graphs.reset( p._sub_graphs.release() );
+std::unique_ptr<std::list<sbp::graph::SubGraph>> sbp::algo::PartitionGraph::partitionSCCs( const eadlib::WeightedGraph<size_t> &base_graph,
+                                                                                           const std::list<std::list<size_t>> &scc_lists,
+                                                                                           const std::string &sb_name_prefix ) {
+    _sub_graphs = std::make_unique<SubGraphList_t>();
+    size_t sg_count { 0 };
+    auto it = scc_lists.begin();
+    if( it != scc_lists.end() && !it->empty() ) { //Singleton SCCs
+        partitionSingletonSCCs( base_graph, *it, std::string( sb_name_prefix + std::to_string( sg_count ) ) );
+        sg_count++;
+    }
+    for( it = std::next( it ); it != scc_lists.end(); ++it) { //All the other SCCs
+        partitionSCC( base_graph, *it, std::string( sb_name_prefix + std::to_string( sg_count ) ) );
+        sg_count++;
+    }
+    return std::move( _sub_graphs );
 }
 
 /**
@@ -36,10 +41,10 @@ sbp::algo::PartitionGraph & sbp::algo::PartitionGraph::operator =( sbp::algo::Pa
  * @param subGraph_name Name of the created SubGraph
  * @return Iterator to the created SubGraph
  */
-sbp::algo::PartitionGraph::iterator sbp::algo::PartitionGraph::partitionSCC( const eadlib::WeightedGraph<size_t> &base_graph,
-                                                                             const std::list<size_t> &scc,
-                                                                             const std::string &subGraph_name ) {
-    auto sub_graph = _sub_graphs->emplace( _sub_graphs->begin(), subGraph_name );
+void sbp::algo::PartitionGraph::partitionSCC( const eadlib::WeightedGraph<size_t> &base_graph,
+                                              const std::list<size_t> &scc,
+                                              const std::string &subGraph_name ) {
+    auto sub_graph = _sub_graphs->emplace( _sub_graphs->end(), subGraph_name );
     auto entrance_id = sub_graph->getSourceID();
     auto exit_id     = sub_graph->getTerminalID();
     //add node
@@ -69,7 +74,6 @@ sbp::algo::PartitionGraph::iterator sbp::algo::PartitionGraph::partitionSCC( con
             }
         }
     }
-    return sub_graph;
 }
 
 /**
@@ -79,9 +83,9 @@ sbp::algo::PartitionGraph::iterator sbp::algo::PartitionGraph::partitionSCC( con
  * @param subGraph_name Name of the created SubGraph
  * @return Iterator to the created SubGraph
  */
-sbp::algo::PartitionGraph::iterator sbp::algo::PartitionGraph::partitionSingletonSCCs( const eadlib::WeightedGraph<size_t> &base_graph,
-                                                                                       const std::list<size_t> &scc,
-                                                                                       const std::string &subGraph_name ) {
+void sbp::algo::PartitionGraph::partitionSingletonSCCs( const eadlib::WeightedGraph<size_t> &base_graph,
+                                                        const std::list<size_t> &scc,
+                                                        const std::string &subGraph_name ) {
     auto sub_graph = _sub_graphs->emplace( _sub_graphs->begin(), subGraph_name );
     auto entrance_id = sub_graph->getSourceID();
     auto exit_id     = sub_graph->getTerminalID();
@@ -116,55 +120,8 @@ sbp::algo::PartitionGraph::iterator sbp::algo::PartitionGraph::partitionSingleto
             }
         }
     }
-    return sub_graph;
 }
 
-/**
- * Iterator begin()
- * @return Begin iterator
- */
-sbp::algo::PartitionGraph::iterator sbp::algo::PartitionGraph::begin() {
-    return _sub_graphs->begin();
-}
 
-/**
- * Iterator end()
- * @return End iterator
- */
-sbp::algo::PartitionGraph::iterator sbp::algo::PartitionGraph::end() {
-    return _sub_graphs->end();
-}
-
-/**
- * Const Iterator begin()
- * @return Begin iterator
- */
-sbp::algo::PartitionGraph::const_iterator sbp::algo::PartitionGraph::cbegin() {
-    return _sub_graphs->cbegin();
-}
-
-/**
- * Const Iterator end()
- * @return End iterator
- */
-sbp::algo::PartitionGraph::const_iterator sbp::algo::PartitionGraph::cend() {
-    return _sub_graphs->cend();
-}
-
-/**
- * Gets the empty state of the list of SubGraph
- * @return List of SubGraph empty state
- */
-bool sbp::algo::PartitionGraph::empty() const {
-    return _sub_graphs->empty();
-}
-
-/**
- * Gets the number of SubGraphs created
- * @return Size of list of SubGraph
- */
-size_t sbp::algo::PartitionGraph::size() const {
-    return _sub_graphs->size();
-}
 
 
