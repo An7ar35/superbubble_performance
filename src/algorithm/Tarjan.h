@@ -23,7 +23,6 @@ namespace sbp {
             Tarjan( const eadlib::WeightedGraph<size_t> &graph );
             ~Tarjan();
             std::unique_ptr<std::list<std::list<size_t>>> findSCCs();
-            static size_t concatenateSingletonSCCs( std::list<std::list<size_t>> &scc_list );
           private:
             //Type definition
             typedef std::list<std::list<size_t>> SCCList_t;
@@ -43,6 +42,8 @@ namespace sbp {
                            std::unordered_map<size_t, Discovery> &discovery,
                            std::stack<size_t> &stack,
                            std::vector<bool> &stackMember );
+            //Concatenating function
+            void concatenateSingletonSCCs();
             //Private variables
             const eadlib::WeightedGraph<size_t> &_graph;
             std::unique_ptr<SCCList_t> _scc;

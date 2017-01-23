@@ -18,7 +18,7 @@ sbp::algo::Tarjan::~Tarjan() {}
 
 /**
  * Finds Strongly Connected Components in the Graph
- * @return List of strongly connected components
+ * @return List of strongly connected components with the first one being a concatenated list of singleton SCCs
  */
 std::unique_ptr<sbp::algo::Tarjan::SCCList_t> sbp::algo::Tarjan::findSCCs() {
     _scc = std::make_unique<SCCList_t>();
@@ -33,11 +33,12 @@ std::unique_ptr<sbp::algo::Tarjan::SCCList_t> sbp::algo::Tarjan::findSCCs() {
     std::vector<bool>   stackMember( _graph.nodeCount(), false );
     //Finding SCCs...
     size_t index { 0 };
-    for( auto v : _graph ) {
-        if( discovery.find( v.first ) == discovery.end() ) { //i.e. not discovered yet
-            findSCCs( v.first, index, discovery, stack, stackMember );
+    for( auto it = _graph.begin(); it != _graph.end(); ++it ) {
+        if( discovery.find( it->first ) == discovery.end() ) { //i.e. not discovered yet
+            findSCCs( it->first, index, discovery, stack, stackMember );
         }
     }
+    concatenateSingletonSCCs();
     return std::move( _scc );
 }
 
@@ -113,22 +114,19 @@ void sbp::algo::Tarjan::findSCCs( const size_t &vertex_id,
 /**
  * Concatenate all singletons SCCs into the first list of SCCs passed
  * @param scc_list List of SCCs
- * @return Number of singletons found
  */
-size_t sbp::algo::Tarjan::concatenateSingletonSCCs( std::list<std::list<size_t>> &scc_list ) {
-    size_t count { 0 };
-    auto first = scc_list.begin();
-    auto next  = scc_list.begin();
-    if( first != scc_list.end() && scc_list.size() > 1 ) {
+void sbp::algo::Tarjan::concatenateSingletonSCCs() {
+    auto first = _scc->begin();
+    auto next  = _scc->begin();
+    if( first != _scc->end() && _scc->size() > 1 ) {
         if( first->size() == 1 ) {
             next++;
-            count++;
-            while( next != scc_list.end() && next->size() == 1 ) {
+            while( next != _scc->end() && next->size() == 1 ) {
                 first->emplace_back( next->front() );
-                next = scc_list.erase( next );
-                count++;
+                next = _scc->erase( next );
             }
+        } else { //add empty singleton list for consistency
+            _scc->emplace_front( std::list<size_t>() );
         }
     }
-    return count;
 }
