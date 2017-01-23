@@ -122,7 +122,7 @@ All [SCCs](https://en.wikipedia.org/wiki/Strongly_connected_component) are found
 > up an SCC.
 >
 > All [singleton](https://en.wikipedia.org/wiki/Singleton_(mathematics)) SCCs in
-> the list (i.e.: any SCC with just 1 node) are combined as a single set.|
+> the list (i.e.: any SCC with just 1 node) are combined as a single set.
 
 
 //TODO SCCs found pic
@@ -133,22 +133,58 @@ All [SCCs](https://en.wikipedia.org/wiki/Strongly_connected_component) are found
 
 The graph is partitioned into sub-graphs based on the SCCs found.
 
+//TODO example pic
+
+An entrance node __r__ and exit node __r'__ are added to all SubGraphs.
+
+//TODO example pic
+
 > __Implementation notes:__
 >
-> The graph is partitioned by passing each `std::list<size_t>` SCCs to a 
-> `sbp::graph::SubGraph` constructor which recreates the graph portion to be
-> partitioned and adds the required entrance and exit nodes (__r__ and __r'__)
-> with the edges to it.
+> The graph is partitioned by passing each `std::list<size_t>` SCCs to the 
+> `algo::PartitionGraph` algorithm class. The algorithm recreates in SubGraphs
+> the graph section covered by the SCCs using self-generated localised node IDs.
 >
-> Each `SubGraph` is stored on the heap using a list of `std::unique_ptr<graph::SubGraph>`.
-> (`std::list<std::unique_ptr<graph::SubGraph>>`)
+> `SubGraph` stores its own ID translation maps.
+>
+> Entrance and exit nodes (__r__ and __r'__) along with their edges to the
+> newly partitioned graph are created in the SubGraph constructor.
+
+Algorithm to create SubGraphs:
+
+For the list of Singleton SCCs:
+1. An edge __v__ -> __r'__ is created for each node __v__ with no children 
+   and that has children outside the SubGraph,
+3. An edge __r__ -> __v__ is created for each node __v__ with no parents
+   and that has parents outside the SubGraph.
 
 
-##### c) 
+For all other SCCs
+2. An edge __v__ -> __r'__ is created for each node __v__ that has children 
+   outside the SubGraph,
+4. An edge __r__ -> __v__ is created for each node __v__ that has parents 
+   outside the SubGraph.
+
+//TODO example pic
+
+
+| Graph ID | SubGraph01 (local) ID |
+|---|---|
+| - | 0 (r)|
+| 5 | 1 |
+| 6 | 2 |
+| 7 | 3 |
+| 8 | 4 |
+| - | 5 (r') |
+
+
+##### c) Creating Directed Acyclic Graphs (DAGs) from the SubGraphs
 
 
 
 ### Linear time SuperBubble identification <a name="linear-algo"></a>
+
+Uses stage 1 & 2 from the Quasi-Linear time algorithm above.
 
 
 
@@ -167,8 +203,8 @@ Wing-Kin Sung, Kunihiko Sadakane, Tetsuo Shibuya, Abha Belorkar, and Iana Pyrogo
 "[An O(_m_ log _m_)-Time Algorithm for Detecting Superbubbles](http://ieeexplore.ieee.org/document/6998850/?reload=true&arnumber=6998850)",
 IEEE/ACM Transactions on Computational Biology and Bioinformatics, Vol. 12, No. 4, July/August 2015
 
+//TODO cite the papers for the algos used (quadratic) 
 
-//TODO cite the papers for the algos used (quadratic)
 
 
 ---
@@ -195,3 +231,6 @@ The software is bundled with components belonging to the "EADlib" library.
 This software is released under the [__GNU General Public License 2__](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html) license.
 
 Please reference when used in project and/or research and/or papers and/or integrated in production code (i.e.: DBAD).
+
+__Stipulation:__ If you do use/reference any of this work for academic purposes you must 
+agree to make the resulting publication(s) accessible to everyone for free (i.e. no paywall!).

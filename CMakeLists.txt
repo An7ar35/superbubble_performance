@@ -39,7 +39,7 @@ set(SOURCE_FILES
         src/graph/SubGraph.cpp
         src/graph/SubGraph.h
         src/algorithm/superbubble/SB_QLinear.cpp
-        src/algorithm/superbubble/SB_QLinear.h)
+        src/algorithm/superbubble/SB_QLinear.h src/graph/DAG.cpp src/graph/DAG.h src/algorithm/PartitionGraph.cpp src/algorithm/PartitionGraph.h)
 
 set(SQLITE3_FILES
         external/sqlite3/sqlite3.h
@@ -67,7 +67,7 @@ if( GTEST_FOUND )
 
     set(TEST_FILES
             tests/main.cpp
-            tests/Tarjan_test.h)
+            tests/Tarjan_test.h tests/SubGraph_test.h)
 
     add_executable(
             sbp_tests

@@ -2,58 +2,56 @@
 
 /**
  * Constructor
- * @param base_graph    Master graph from which the subGraph is derived
- * @param scc           Strongly connected component set to build the sub graph with
  * @param subGraph_name Name of the sub-graph
  */
-sbp::graph::SubGraph::SubGraph( const eadlib::WeightedGraph<size_t> &base_graph,
-                                const std::list<size_t> &scc,
-                                const std::string &subGraph_name  ) :
-    eadlib::Graph<size_t>( subGraph_name )
+sbp::graph::SubGraph::SubGraph( const std::string &name ) :
+    eadlib::Graph<size_t>( name ),
+    _entrance_node( 0 ),
+    _exit_node( 1 )
 {
-    //add nodes to sub-graph and maps
-    addNode( ( _entrance_node = 0 ) ); // r
-    size_t local_id { 1 };
-    for( auto v : scc ) {
-        addNode( local_id );
-        _local2global_map.emplace( std::make_pair( local_id, v ) );
-        _global2local_map.emplace( std::make_pair( v, local_id ) );
-        local_id++;
-    }
-    addNode( ( _exit_node = local_id ) ); // r'
-    //add edges
-    for( auto it = begin(); it != end(); ++it ) {
-        if( !( it->first == _entrance_node || it->first == _exit_node ) ) {
-            auto v = _local2global_map.at( it->first );
-            if( base_graph.at( v ).childrenList.empty() ) {
-                createDirectedEdge( it->first, _exit_node ); //creates v->r'
-            } else {
-                for( auto u : base_graph.at( v ).childrenList ) {
-                    auto local_u_search = _global2local_map.find( u );
-                    if( local_u_search != _global2local_map.end() ) {
-                        createDirectedEdge( it->first, local_u_search->second );
-                    } else { //edge leaving this SCC sub-graph
-                        createDirectedEdge( it->first, _exit_node ); //creates v->r'
-                    }
-                }
-            }
-            if( base_graph.at( v ).parentsList.empty() ) {
-                createDirectedEdge( _entrance_node, it->first ); //creates r->v
-            } else {
-                for( auto u : base_graph.at( v ).parentsList ) {
-                    if( _global2local_map.find( u ) == _global2local_map.end() ) { //not in sub-graph
-                        createDirectedEdge( _entrance_node, it->first ); //creates r->v
-                    }
-                }
-            }
-        }
-    }
+    eadlib::Graph<size_t>::addNode( 0 ); //r
+    eadlib::Graph<size_t>::addNode( 1 ); //r'
 }
 
 /**
  * Destructor
  */
 sbp::graph::SubGraph::~SubGraph() {}
+
+/**
+ * Adds a node to the SubGraph
+ * @param node Node to add
+ * @return Success
+ */
+bool sbp::graph::SubGraph::addNode( const size_t &node ) {
+    auto local_id = nodeCount();
+    _local2global_map.emplace( std::make_pair( local_id, node ) );
+    _global2local_map.emplace( std::make_pair( node, local_id ) );
+    return eadlib::Graph<size_t>::addNode( local_id );
+}
+
+/**
+ * Finds a node from its local ID
+ * @param node Local ID of node to find
+ * @return Graph iterator
+ */
+eadlib::Graph<unsigned long>::const_iterator sbp::graph::SubGraph::findLocalID( const size_t &node ) const {
+    return find( node );
+}
+
+/**
+ * Finds a node from its global ID
+ * @param node Global ID of node to find
+ * @return Graph iterator
+ */
+eadlib::Graph<unsigned long>::const_iterator sbp::graph::SubGraph::findGlobalID( const size_t &node ) const {
+    auto it = _global2local_map.find( node );
+    if( it != _global2local_map.end() ) {
+        return find( it->second );
+    } else {
+        return end();
+    }
+}
 
 /**
  * Gets the local source node ID of the subgraph (r)
@@ -72,7 +70,7 @@ size_t sbp::graph::SubGraph::getTerminalID() const {
 }
 
 /**
- * Gets the global ID for the local one
+ * Gets the global ID from a local one
  * @param local Local ID
  * @return Global ID
  * @throws std::out_of_range when local id passed is not in global graph (r/r'/invalid node)
@@ -80,6 +78,20 @@ size_t sbp::graph::SubGraph::getTerminalID() const {
 size_t sbp::graph::SubGraph::getGlobalID( const size_t local ) const {
     try {
         return _local2global_map.at( local );
+    } catch( std::out_of_range e ) {
+        throw e;
+    }
+}
+
+/**
+ * Gets the local ID from a global one
+ * @param global Global ID
+ * @return Local ID
+ * @throws std::out_of_range when global id passed is not in local graph (invalid node)
+ */
+size_t sbp::graph::SubGraph::getLocalID( const size_t global ) const {
+    try {
+        return _global2local_map.at( global );
     } catch( std::out_of_range e ) {
         throw e;
     }

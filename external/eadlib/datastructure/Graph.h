@@ -53,7 +53,7 @@ namespace eadlib {
         bool createDirectedEdge( const T &from, const T &to );
         bool createDirectedEdge_fast( const T &from, const T &to );
         bool deleteDirectedEdge( const T &from, const T &to );
-        bool addNode( const T &node );
+        virtual bool addNode( const T &node );
         bool deleteNode( const T &node );
         //Graph state
         bool isReachable( const T &from, const T &to ) const;

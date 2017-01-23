@@ -1,12 +1,16 @@
 #ifndef SUPERBUBBLE_PERFORMANCE_SUBGRAPH_TEST_H
 #define SUPERBUBBLE_PERFORMANCE_SUBGRAPH_TEST_H
 
+#include <eadlib/io/FileWriter.h>
 #include "gtest/gtest.h"
+#include "../src/algorithm/PartitionGraph.h"
+#include "../src/algorithm/PartitionGraph.cpp"
 #include "../src/graph/SubGraph.h"
 #include "../src/graph/SubGraph.cpp"
+#include "../src/io/DotExport.h"
 
-TEST( SubGraph_Tests, Constructor ) {
-    auto g = eadlib::WeightedGraph<size_t>( "SCC2_concatenate_test" );
+TEST( SubGraph_Tests, Constructor01 ) {
+    auto g = eadlib::WeightedGraph<size_t>( "Graph" );
     g.createDirectedEdge_fast( 0, 1 );
     g.createDirectedEdge_fast( 0, 5 );
     g.createDirectedEdge_fast( 1, 2 );
@@ -19,32 +23,70 @@ TEST( SubGraph_Tests, Constructor ) {
     g.createDirectedEdge_fast( 5, 6 );
     g.createDirectedEdge_fast( 6, 7 );
     //SCCs
-    auto strongly_connected_components = sbp::algo::Tarjan( g ).findSCCs();
-    auto singleton_count = sbp::algo::Tarjan::concatenateSingletonSCCs( *strongly_connected_components );
+    auto found_SCCs      = sbp::algo::Tarjan( g ).findSCCs();
+    auto singleton_count = sbp::algo::Tarjan::concatenateSingletonSCCs( *found_SCCs );
     //Partitioning
-    std::list<sbp::graph::SubGraph> sub_graphs;
-//    auto it = strongly_connected_components->begin();
-//    if( singleton_count > 0 && it != strongly_connected_components->end() ) { //Singleton SCCs sub-graph
-//        sub_graphs.emplace_back( sbp::graph::SubGraph( g, *it ) );
-//        it = std::next( it );
-//    }
-//    size_t sg_count { 1 };
-//    for( ; it != strongly_connected_components->end(); ++it) {
-//        sub_graphs.emplace_back( sbp::graph::SubGraph( g, *it, std::string( "sg" + sg_count ) ) );
-//        sg_count++;
-//    }
-
+    auto sub_graphs      = sbp::algo::PartitionGraph();
     size_t sg_count { 0 };
-    for( auto it = strongly_connected_components->begin(); it != strongly_connected_components->end(); ++it) {
-        sub_graphs.emplace_back( sbp::graph::SubGraph( g, *it, std::string( "sg" + sg_count ) ) );
+    auto it = found_SCCs->begin();
+    if( it != found_SCCs->end() ) { //Singleton SCCs
+        sub_graphs.partitionSingletonSCCs( g, *it, std::string( "SubGraph" + sg_count ) );
         sg_count++;
     }
+    for( it = std::next( it ); it != found_SCCs->end(); ++it) { //All the other SCCs
+        sub_graphs.partitionSCC( g, *it, std::string( "SubGraph" + sg_count ) );
+        sg_count++;
+    }
+    found_SCCs.reset(); //no longer needed so early destruction to free up memory
 
     for( auto it = sub_graphs.begin(); it != sub_graphs.end(); ++it ) {
-        std::cout << "LOCAL printing subgraph (r:" << it->getSourceID() << ", r':" << it->getTerminalID() << "):" << std::endl;
+        auto writer = eadlib::io::FileWriter( std::string( it->getName() + ".dot" ) );
+        auto dot_writer = sbp::io::DotExport<size_t>( writer );
+        writer.open( true );
+        dot_writer.exportToDot( *it );
+        std::cout << "LOCAL printing subgraph " << it->getName() << " (r:" << it->getSourceID() << ", r':" << it->getTerminalID() << "):" << std::endl;
         it->printLocal( std::cout );
-        std::cout << "GLOBAL printing subgraph (r:" << it->getSourceID() << ", r':" << it->getTerminalID() << "):" << std::endl;
+        std::cout << "GLOBAL printing subgraph " << it->getName() << " (r:" << it->getSourceID() << ", r':" << it->getTerminalID() << "):" << std::endl;
         it->printGlobal( std::cout );
+    }
+}
+
+TEST( SubGraph_Tests, Constructor02 ) {
+    auto g = eadlib::WeightedGraph<size_t>( "Graph" );
+    g.createDirectedEdge_fast( 0, 1 );
+    g.createDirectedEdge_fast( 0, 5 );
+    g.createDirectedEdge_fast( 1, 2 );
+    g.createDirectedEdge_fast( 1, 6 );
+    g.createDirectedEdge_fast( 2, 3 );
+    g.createDirectedEdge_fast( 2, 4 );
+    g.createDirectedEdge_fast( 3, 4 );
+    g.createDirectedEdge_fast( 4, 1 );
+    g.createDirectedEdge_fast( 4, 5 );
+    g.createDirectedEdge_fast( 5, 6 );
+    g.createDirectedEdge_fast( 6, 7 );
+
+    //SCCs
+    auto found_SCCs      = sbp::algo::Tarjan( g ).findSCCs();
+    auto singleton_count = sbp::algo::Tarjan::concatenateSingletonSCCs( *found_SCCs );
+    //Partitioning
+    auto sub_graphs      = sbp::algo::PartitionGraph();
+    size_t sg_count { 0 };
+    auto it = found_SCCs->begin();
+    if( it != found_SCCs->end() ) { //Singleton SCCs
+        sub_graphs.partitionSingletonSCCs( g, *it, std::string( "SubGraph" + sg_count ) );
+        sg_count++;
+    }
+    for( it = std::next( it ); it != found_SCCs->end(); ++it) { //All the other SCCs
+        sub_graphs.partitionSCC( g, *it, std::string( "SubGraph" + sg_count ) );
+        sg_count++;
+    }
+    found_SCCs.reset(); //no longer needed so early destruction to free up memory
+
+    for( auto it = sub_graphs.begin(); it != sub_graphs.end(); ++it ) {
+        auto writer = eadlib::io::FileWriter( std::string( it->getName() + ".dot" ) );
+        auto dot_writer = sbp::io::DotExport<size_t>( writer );
+        writer.open( true );
+        dot_writer.exportToDot( *it );
     }
 }
 

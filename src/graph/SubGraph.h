@@ -10,16 +10,21 @@ namespace sbp {
     namespace graph {
         class SubGraph : public eadlib::Graph<size_t> {
           public:
-            SubGraph( const eadlib::WeightedGraph<size_t> &base_graph,
-                      const std::list<size_t> &scc,
-                      const std::string &subGraph_name );
+            SubGraph( const std::string &name );
             ~SubGraph();
+            //Manipulation
+            bool addNode( const size_t &node ) override;
+            //Access
+            const_iterator findLocalID( const size_t &node ) const;
+            const_iterator findGlobalID( const size_t &node ) const;
             size_t getSourceID() const;
             size_t getTerminalID() const;
             //Translation
             size_t getGlobalID( const size_t local ) const;
+            size_t getLocalID( const size_t global ) const;
             //Print
             std::ostream & printLocal( std::ostream &out ) const;
+
             std::ostream & printGlobal( std::ostream &out ) const;
 
           private:

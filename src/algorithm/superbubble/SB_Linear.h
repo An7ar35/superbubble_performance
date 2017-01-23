@@ -24,6 +24,7 @@
 
 #include "container/SuperBubble.h"
 #include "../Tarjan.h"
+#include "../PartitionGraph.h"
 
 namespace sbp {
     namespace algo {

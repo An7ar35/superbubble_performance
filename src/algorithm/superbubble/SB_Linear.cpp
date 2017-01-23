@@ -19,21 +19,27 @@ sbp::algo::SB_Linear::~SB_Linear() {}
  * @return Success
  */
 bool sbp::algo::SB_Linear::run( std::list<container::SuperBubble> &superbubble_list ) {
-    //TODO
-    auto strongly_connected_components = Tarjan( _graph ).findSCCs();
-    auto singletonSCC_count            = Tarjan::concatenateSingletonSCCs( *strongly_connected_components );
-    auto subGraphs_count               = strongly_connected_components->size();
-    auto subGraphs                     = std::make_unique<std::vector<eadlib::Graph<size_t>>>();
-    auto global2local_id_index         = std::make_unique<std::vector<size_t>>( _graph.nodeCount() );
+    //Find SCCs
+    auto found_SCCs         = Tarjan( _graph ).findSCCs();
+    auto singletonSCC_count = Tarjan::concatenateSingletonSCCs( *found_SCCs );
 
-    std::cout << "Found " << singletonSCC_count << " singleton SCCs." << std::endl;
-    for( auto scc : *strongly_connected_components ) {
-        for( auto vertex_id : scc ) {
-            std::cout << vertex_id << ",";
-        }
-        std::cout << std::endl;
+    //Partition graph into sub-graphs
+    auto sub_graphs = algo::PartitionGraph();
+    size_t sg_count { 0 };
+    auto it = found_SCCs->begin();
+    if( it != found_SCCs->end() ) { //Singleton SCCs
+        sub_graphs.partitionSingletonSCCs( _graph, *it, std::string( "SubGraph" + sg_count ) );
+        sg_count++;
     }
+    for( auto it = std::next( it ); it != found_SCCs->end(); ++it) { //All the other SCCs
+        sub_graphs.partitionSCC( _graph, *it, std::string( "SubGraph" + sg_count ) );
+        sg_count++;
+    }
+    found_SCCs.reset(); //no longer needed so early destruction to free up memory
 
+
+
+    //TODO
     return 0;
 }
 
