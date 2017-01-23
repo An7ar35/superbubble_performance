@@ -24,8 +24,8 @@
 #include <list>
 #include <unordered_map>
 
-#include "eadlib/logger/Logger.h"
-#include "eadlib/exception/corruption.h"
+#include "../logger/Logger.h"
+#include "../exception/corruption.h"
 
 namespace eadlib {
     template<class T> class Graph {
@@ -41,7 +41,7 @@ namespace eadlib {
         Graph( std::initializer_list<T> list );
         Graph( const Graph<T> &graph );
         Graph( Graph<T> &&graph );
-        ~Graph() {};
+        virtual ~Graph() {};
         //Iterator
         typedef typename Graph_t::const_iterator const_iterator;
         const_iterator begin() const;
@@ -70,7 +70,7 @@ namespace eadlib {
         std::ostream & printAdjacencyList( std::ostream &out ) const;
         std::ostream & printGraphNodes( std::ostream &out ) const;
         std::ostream & printStats( std::ostream &out ) const;
-      private:
+      protected:
         bool checkNodesExist( const T& from, const T &to ) const;
         Graph_t     _adjacencyList;
         size_t      _edgeCount;

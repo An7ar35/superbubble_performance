@@ -6,7 +6,6 @@
     @copyright      E. A. Davison 2016
     @license        GNUv2 Public License
 **/
-
 #ifndef EADLIB_WEIGHTEDGRAPH_H
 #define EADLIB_WEIGHTEDGRAPH_H
 
@@ -17,8 +16,8 @@
 #include <vector>
 #include <list>
 
-#include "eadlib/logger/Logger.h"
-#include "eadlib/exception/corruption.h"
+#include "../logger/Logger.h"
+#include "../exception/corruption.h"
 
 namespace eadlib {
     template<class T> class WeightedGraph {
@@ -36,7 +35,7 @@ namespace eadlib {
         WeightedGraph( std::initializer_list<T> list );
         WeightedGraph( const WeightedGraph<T> &graph );
         WeightedGraph( WeightedGraph<T> &&graph );
-        ~WeightedGraph() {};
+        virtual ~WeightedGraph() {};
         //Iterator
         typedef typename Graph_t::const_iterator const_iterator;
         const_iterator begin() const;
@@ -71,7 +70,7 @@ namespace eadlib {
         std::ostream & printAdjacencyList( std::ostream &out ) const;
         std::ostream & printGraphNodes( std::ostream &out ) const;
         std::ostream & printStats( std::ostream &out ) const;
-      private:
+      protected:
         bool checkNodesExist( const T &a, const T &b ) const;
         template <class U> bool checkOverflow( U a, U b ) const;
         Graph_t     _adjacencyList;
