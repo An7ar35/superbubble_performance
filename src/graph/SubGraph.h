@@ -24,7 +24,6 @@ namespace sbp {
             size_t getLocalID( const size_t global ) const;
             //Print
             std::ostream & printLocal( std::ostream &out ) const;
-
             std::ostream & printGlobal( std::ostream &out ) const;
 
           private:
