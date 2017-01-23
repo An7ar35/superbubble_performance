@@ -24,22 +24,11 @@ TEST( SubGraph_Tests, Constructor01 ) {
     g.createDirectedEdge_fast( 6, 7 );
     //SCCs
     auto found_SCCs      = sbp::algo::Tarjan( g ).findSCCs();
-    auto singleton_count = sbp::algo::Tarjan::concatenateSingletonSCCs( *found_SCCs );
     //Partitioning
-    auto sub_graphs      = sbp::algo::PartitionGraph();
-    size_t sg_count { 0 };
-    auto it = found_SCCs->begin();
-    if( it != found_SCCs->end() ) { //Singleton SCCs
-        sub_graphs.partitionSingletonSCCs( g, *it, std::string( "SubGraph" + sg_count ) );
-        sg_count++;
-    }
-    for( it = std::next( it ); it != found_SCCs->end(); ++it) { //All the other SCCs
-        sub_graphs.partitionSCC( g, *it, std::string( "SubGraph" + sg_count ) );
-        sg_count++;
-    }
+    auto sub_graphs      = sbp::algo::PartitionGraph().partitionSCCs( g, *found_SCCs, "SubGraph" );
     found_SCCs.reset(); //no longer needed so early destruction to free up memory
 
-    for( auto it = sub_graphs.begin(); it != sub_graphs.end(); ++it ) {
+    for( auto it = sub_graphs->begin(); it != sub_graphs->end(); ++it ) {
         auto writer = eadlib::io::FileWriter( std::string( it->getName() + ".dot" ) );
         auto dot_writer = sbp::io::DotExport<size_t>( writer );
         writer.open( true );
@@ -67,22 +56,11 @@ TEST( SubGraph_Tests, Constructor02 ) {
 
     //SCCs
     auto found_SCCs      = sbp::algo::Tarjan( g ).findSCCs();
-    auto singleton_count = sbp::algo::Tarjan::concatenateSingletonSCCs( *found_SCCs );
     //Partitioning
-    auto sub_graphs      = sbp::algo::PartitionGraph();
-    size_t sg_count { 0 };
-    auto it = found_SCCs->begin();
-    if( it != found_SCCs->end() ) { //Singleton SCCs
-        sub_graphs.partitionSingletonSCCs( g, *it, std::string( "SubGraph" + sg_count ) );
-        sg_count++;
-    }
-    for( it = std::next( it ); it != found_SCCs->end(); ++it) { //All the other SCCs
-        sub_graphs.partitionSCC( g, *it, std::string( "SubGraph" + sg_count ) );
-        sg_count++;
-    }
+    auto sub_graphs      = sbp::algo::PartitionGraph().partitionSCCs( g, *found_SCCs, "SubGraph" );
     found_SCCs.reset(); //no longer needed so early destruction to free up memory
 
-    for( auto it = sub_graphs.begin(); it != sub_graphs.end(); ++it ) {
+    for( auto it = sub_graphs->begin(); it != sub_graphs->end(); ++it ) {
         auto writer = eadlib::io::FileWriter( std::string( it->getName() + ".dot" ) );
         auto dot_writer = sbp::io::DotExport<size_t>( writer );
         writer.open( true );
