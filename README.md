@@ -153,16 +153,18 @@ An entrance node __r__ and exit node __r'__ are added to all SubGraphs.
 Algorithm to create SubGraphs:
 
 For the list of Singleton SCCs:
+
 1. An edge __v__ -> __r'__ is created for each node __v__ with no children 
    and that has children outside the SubGraph,
-3. An edge __r__ -> __v__ is created for each node __v__ with no parents
+2. An edge __r__ -> __v__ is created for each node __v__ with no parents
    and that has parents outside the SubGraph.
 
 
 For all other SCCs
-2. An edge __v__ -> __r'__ is created for each node __v__ that has children 
+
+1. An edge __v__ -> __r'__ is created for each node __v__ that has children 
    outside the SubGraph,
-4. An edge __r__ -> __v__ is created for each node __v__ that has parents 
+2. An edge __r__ -> __v__ is created for each node __v__ that has parents 
    outside the SubGraph.
 
 //TODO example pic
