@@ -4,6 +4,8 @@
 
     Implementation of the 'PartitionGraph(H)' algorithm found in the Quasi-Linear SuperBubble algorithm paper
     See the README.md
+
+    @dependencies   eadlib::WeightedGraph, sbp::graph::SubGraph
 **/
 #ifndef SUPERBUBBLE_PERFORMANCE_GRAPHPARTITIONER_H
 #define SUPERBUBBLE_PERFORMANCE_GRAPHPARTITIONER_H

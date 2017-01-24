@@ -1,3 +1,15 @@
+/**
+    @class          sbp::algo::GraphCompressor
+    @brief          deBruijn graph compressor algorithm
+
+    Compressor algorithm to concatenate overlapping k-mers
+    where possible in a deBruijn graph.
+
+    @author         E. A. Davison
+    @copyright      E. A. Davison 2016
+    @license        GNUv2 Public License
+    @dependencies   eadlib::WeightedGraph, eadlib::cli::ProgressBar
+**/
 #ifndef SUPERBUBBLE_PERFORMANCE_GRAPHCOMPRESSOR_H
 #define SUPERBUBBLE_PERFORMANCE_GRAPHCOMPRESSOR_H
 
@@ -5,7 +17,7 @@
 #include <queue>
 #include <string>
 
-#include "eadlib/cli/graphic/ProgressBar.h"
+#include <eadlib/cli/graphic/ProgressBar.h>
 #include <eadlib/datastructure/WeightedGraph.h>
 
 namespace sbp {
