@@ -1,5 +1,6 @@
 #include "Tarjan_test.h"
-#include "SubGraph_test.h"
+#include "PartitionGraph_test.h"
+#include "GraphToDAG_test.h"
 
 #include "gtest/gtest.h"
 

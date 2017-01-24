@@ -4,7 +4,6 @@
 #include "gtest/gtest.h"
 #include <eadlib/datastructure/WeightedGraph.h>
 #include "../src/algorithm/Tarjan.h"
-#include "../src/algorithm/Tarjan.cpp"
 
 TEST( Tarjan_Tests, SCC1_concatenate ) {
     auto graph = eadlib::WeightedGraph<size_t>( "SCC1_test" );

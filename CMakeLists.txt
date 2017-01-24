@@ -11,8 +11,11 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build/")
 
 include_directories(external)
 
-set(SOURCE_FILES
+set(MAIN
         src/main.cpp
+)
+
+set(SOURCE_FILES
         src/io/FastaParser.cpp
         src/io/FastaParser.h
         src/io/DotExport.h
@@ -39,7 +42,13 @@ set(SOURCE_FILES
         src/graph/SubGraph.cpp
         src/graph/SubGraph.h
         src/algorithm/superbubble/SB_QLinear.cpp
-        src/algorithm/superbubble/SB_QLinear.h src/graph/DAG.cpp src/graph/DAG.h src/algorithm/PartitionGraph.cpp src/algorithm/PartitionGraph.h)
+        src/algorithm/superbubble/SB_QLinear.h
+        src/graph/DAG.cpp
+        src/graph/DAG.h
+        src/algorithm/PartitionGraph.cpp
+        src/algorithm/PartitionGraph.h
+        src/algorithm/GraphToDAG.cpp
+        src/algorithm/GraphToDAG.h)
 
 set(SQLITE3_FILES
         external/sqlite3/sqlite3.h
@@ -48,7 +57,7 @@ set(SQLITE3_FILES
 
 add_library(sqlite3 ${SQLITE3_FILES})
 
-add_executable(sbp ${SOURCE_FILES})
+add_executable(sbp ${MAIN} ${SOURCE_FILES} )
 
 SET_TARGET_PROPERTIES(sbp PROPERTIES LINKER_LANGUAGE CXX)
 SET_TARGET_PROPERTIES(sqlite3 PROPERTIES LINKER_LANGUAGE CXX)
@@ -67,13 +76,17 @@ if( GTEST_FOUND )
 
     set(TEST_FILES
             tests/main.cpp
-            tests/Tarjan_test.h tests/SubGraph_test.h)
+            tests/Tarjan_test.h
+            tests/PartitionGraph_test.h
+            tests/GraphToDAG_test.h)
 
     add_executable(
             sbp_tests
+            ${SOURCE_FILES}
             ${TEST_FILES})
 
     target_link_libraries(sbp_tests gtest)
+    TARGET_LINK_LIBRARIES(sbp_tests sqlite3)
     add_test(sbp_tests ${TEST_FILES})
 else()
     message(WARNING, "Google Test package not found. Unit tests will not be compiled...")
