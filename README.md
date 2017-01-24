@@ -121,13 +121,12 @@ All [SCCs](https://en.wikipedia.org/wiki/Strongly_connected_component) are found
 > `std::list<size_t>` is a set of 1 or more node ID(s) from the graph that makes 
 > up an SCC.
 >
-> All [singleton](https://en.wikipedia.org/wiki/Singleton_(mathematics)) SCCs in
-> the list (i.e.: any SCC with just 1 node) are combined as a single set.
-
+> All [singleton](https://en.wikipedia.org/wiki/Singleton_(mathematics)) SCCs found
+> in the graph are combined as a single set and stored as the first `std::list<size_t>`
+> in the list (i.e.: any SCC with just 1 node). If none are found then the first
+> `std::list<size_t>` list is empty.
 
 //TODO SCCs found pic
-
-//TODO SCCs with combined singleton pic
 
 ##### b) Partitioning the graph
 
@@ -148,7 +147,7 @@ An entrance node __r__ and exit node __r'__ are added to all SubGraphs.
 > `SubGraph` stores its own ID translation maps.
 >
 > Entrance and exit nodes (__r__ and __r'__) along with their edges to the
-> newly partitioned graph are created in the SubGraph constructor.
+> newly partitioned graph are created in the SubGraph class constructor.
 
 Algorithm to create SubGraphs:
 
