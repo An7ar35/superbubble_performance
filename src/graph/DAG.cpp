@@ -7,7 +7,8 @@
 sbp::graph::DAG::DAG( const std::string &name ) :
     eadlib::Graph<size_t>( name ),
     _entrance_node( 0 ),
-    _exit_node( 1 )
+    _exit_node( 1 ),
+    _unique_node_count( 2 )
 {
     eadlib::Graph<size_t>::addNode( 0 ); //r
     eadlib::Graph<size_t>::addNode( 1 ); //r'
@@ -35,6 +36,7 @@ void sbp::graph::DAG::addNodes( const sbp::graph::SubGraph &sub_graph ) {
             eadlib::Graph<size_t>::addNode( local_id2 );
             local_id1++;
             local_id2++;
+            _unique_node_count++;
         }
     }
     std::cout << "End: id1=" << local_id1 << ", id2=" << local_id2 << std::endl;
@@ -108,6 +110,14 @@ std::pair<size_t, size_t> sbp::graph::DAG::getLocalID( const size_t global ) con
     } catch( std::out_of_range e ) {
         throw e;
     }
+}
+
+/**
+ * Gets the number of non-duplicated nodes
+ * @return Unique node counts
+ */
+size_t sbp::graph::DAG::getUniqueNodeCount() const {
+    return _unique_node_count;
 }
 
 /**

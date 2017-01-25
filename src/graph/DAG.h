@@ -19,15 +19,18 @@ namespace sbp {
             //Translation
             size_t getGlobalID( const size_t local ) const;
             std::pair<size_t, size_t> getLocalID( const size_t global ) const;
+            //State
+            size_t getUniqueNodeCount() const;
             //Print
             std::ostream & printLocal( std::ostream &out ) const;
             std::ostream & printGlobal( std::ostream &out ) const;
 
           private:
-            std::unordered_map<size_t, size_t>                    _local2global_map; //local to global ID lookup
-            std::unordered_map<size_t, std::pair<size_t, size_t>> _global2local_map; //reverse ID lookup
-            size_t                                                _entrance_node;    // r
-            size_t                                                _exit_node;        // r'
+            std::unordered_map<size_t, size_t>                    _local2global_map;  //local to global ID lookup
+            std::unordered_map<size_t, std::pair<size_t, size_t>> _global2local_map;  //reverse ID lookup
+            size_t                                                _entrance_node;     // r
+            size_t                                                _exit_node;         // r'
+            size_t                                                _unique_node_count; //
         };
     }
 }
