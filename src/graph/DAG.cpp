@@ -94,6 +94,7 @@ size_t sbp::graph::DAG::getGlobalID( const size_t local ) const {
     try {
         return _local2global_map.at( local );
     } catch( std::out_of_range e ) {
+        LOG_ERROR( "[sbp::graph::DAG::getGlobalID( ", local, " )] ID not mapped to the global graph." );
         throw e;
     }
 }
@@ -108,6 +109,7 @@ std::pair<size_t, size_t> sbp::graph::DAG::getLocalID( const size_t global ) con
     try {
         return _global2local_map.at( global );
     } catch( std::out_of_range e ) {
+        LOG_ERROR( "[sbp::graph::DAG::getLocalID( ", global, " )] ID not mapped to the local graph." );
         throw e;
     }
 }

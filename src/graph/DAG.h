@@ -9,6 +9,7 @@
 #ifndef SUPERBUBBLE_PERFORMANCE_DAG_H
 #define SUPERBUBBLE_PERFORMANCE_DAG_H
 
+#include <eadlib/logger/Logger.h>
 #include "SubGraph.h"
 
 namespace sbp {
