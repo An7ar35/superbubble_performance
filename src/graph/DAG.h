@@ -1,3 +1,11 @@
+/**
+    @class          sbp::graph::DAG
+    @brief          Directed Acyclic Graph
+
+    DAG class to store a SubGraph converted to DAG in.
+
+    @dependencies   sbp::graph::SubGraph
+**/
 #ifndef SUPERBUBBLE_PERFORMANCE_DAG_H
 #define SUPERBUBBLE_PERFORMANCE_DAG_H
 
