@@ -6,6 +6,7 @@ I welcome contributions but pull request will _not be considered_ unless:
 2. Readable and names are clear to their purpose (i.e. no a,b,c stuff),
 3. Some basic unit testing is implemented at least on the more complicated functions,
 4. Nothing breaks.
+5. Modern C++.
 
 #### Documentation
 
