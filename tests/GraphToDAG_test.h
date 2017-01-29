@@ -37,16 +37,15 @@ TEST( GraphToDAG_Tests, Test01 ) {
     }
 
     sub_graphs->erase( sub_graphs->begin() );
-    auto dags = sbp::algo::GraphToDAG().convertToDAG( *sub_graphs, "DAG" );
+    auto dag_packages = sbp::algo::GraphToDAG().convertToDAG( *sub_graphs, "DAG" );
 
-    for( auto it = dags->begin(); it != dags->end(); ++it ) {
-        std::cout << "LOCAL printing DAG " << it->getName() << " (r:" << it->getSourceID() << ", r':" << it->getTerminalID() << "):" << std::endl;
-        it->printLocal( std::cout );
-        std::cout << "GLOBAL printing DAG " << it->getName() << " (r:" << it->getSourceID() << ", r':" << it->getTerminalID() << "):" << std::endl;
-        it->printGlobal( std::cout );
+    for( auto it = dag_packages->begin(); it != dag_packages->end(); ++it ) {
+        std::cout << "LOCAL printing DAG " << it->_dag.getName() << " (r:" << it->_dag.getSourceID() << ", r':" << it->_dag.getTerminalID() << "):" << std::endl;
+        it->_dag.printLocal( std::cout );
+        std::cout << "GLOBAL printing DAG " << it->_dag.getName() << " (r:" << it->_dag.getSourceID() << ", r':" << it->_dag.getTerminalID() << "):" << std::endl;
+        it->_dag.printGlobal( std::cout );
     }
 
 }
-
 
 #endif //SUPERBUBBLE_PERFORMANCE_GRAPHTODAG_TEST_H
