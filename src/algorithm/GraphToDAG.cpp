@@ -27,6 +27,65 @@ std::unique_ptr<sbp::algo::GraphToDAG::DAG_List_t> sbp::algo::GraphToDAG::conver
 }
 
 /**
+ * Converts a SubGraph into a DAG
+ * @param sub_graph SubGraph to convert
+ */
+void sbp::algo::GraphToDAG::convertToDAG( const graph::SubGraph &sub_graph,
+                                          const std::string &dag_name ) {
+    auto dag_pack = _dag_package_list->emplace( _dag_package_list->end(), DAG_Package( dag_name, sub_graph.nodeCount() ) );
+    auto dag = &dag_pack->_dag;
+    dag->addNodes( sub_graph );
+    //create r->v in DAG
+    auto sg_source   = sub_graph.at( sub_graph.getSourceID() );
+    for( auto child : sg_source.childrenList ) { //create dag_source->v
+        if( child != sub_graph.getTerminalID() ) {
+            dag->createDirectedEdge( dag->getSourceID(), child );
+        }
+    }
+
+    //create v'<-r' in DAG
+    auto sg_terminal = sub_graph.at( sub_graph.getTerminalID() );
+    for( auto parent : sg_terminal.parentsList ) { //create v<-dag_terminal
+        if( parent != sub_graph.getSourceID() ) {
+            auto dag_duplicate = dag->findLocalID( parent + dag->getUniqueNodeCount() - 2 );
+            if( dag_duplicate != dag->end() ) {
+                dag->createDirectedEdge( dag_duplicate->first, dag->getTerminalID() );
+            } else {
+                LOG_ERROR( "[sbp::algo::GraphToDAG::convertToDAG( <graph::SubGraph>, ", dag_name, ")] "
+                    "Problem finding the duplicate ID [", dag_duplicate->first ,"] of local node [", parent, "] in the DAG." );
+            }
+        }
+    }
+
+    //if no out-degree from r, choose random v as source/root (not really random but does the trick..)
+    auto root = sg_source.childrenList.empty() ? 3 : sub_graph.getSourceID();
+    auto sg_colours = std::vector<DFSColours>( sub_graph.size(), DFSColours::WHITE );
+    visitUsingDFS( sub_graph, root, sg_colours, 0, *dag_pack );
+
+    //adjust source and terminal vertices
+    if( sub_graph.getOutDegree( sub_graph.getSourceID() ) == 0 ) { //G does not contain r
+        for( auto it = dag->begin(); it != dag->end(); ++it ) {
+            if( it->first != dag->getSourceID() && it->first != dag->getTerminalID() ) {
+                if( dag->getInDegree( it->first ) == 0 ) {
+                    //for every u ∈ V (G ) such that u has no incoming edge in G' create an edge (r, u)
+                    dag->createDirectedEdge( dag->getSourceID(), it->first );
+                }
+            }
+        }
+    }
+    if( sub_graph.getInDegree( sub_graph.getTerminalID() ) == 0 ) { //G does not contain r'
+        for( auto it = dag->begin(); it != dag->end(); ++it ) {
+            if( it->first != dag->getSourceID() && it->first != dag->getTerminalID() ) {
+                if( dag->getOutDegree( it->first ) == 0 ) {
+                    //for every u ∈ V (G ) such that u has no outgoing edge in G' create an edge (u, r')
+                    dag->createDirectedEdge( it->first, dag->getTerminalID() );
+                }
+            }
+        }
+    }
+}
+
+/**
  * DFS visit of nodes in SubGraph to create edges
  * @param sub_graph SubGraph to visit in
  * @param u         Node to visit
@@ -86,59 +145,4 @@ void sbp::algo::GraphToDAG::visitUsingDFS( const sbp::graph::SubGraph &sub_graph
     }
     colour.at( u ) = DFSColours::BLACK;
     finish->at( u ) = ++time;
-}
-
-/**
- * Converts a SubGraph into a DAG
- * @param sub_graph SubGraph to convert
- */
-void sbp::algo::GraphToDAG::convertToDAG( const graph::SubGraph &sub_graph,
-                                          const std::string &dag_name ) {
-    auto dag_pack = _dag_package_list->emplace( _dag_package_list->end(), DAG_Package( dag_name, sub_graph.nodeCount() ) );
-    auto dag = &dag_pack->_dag;
-    dag->addNodes( sub_graph );
-    //create r->v in DAG
-    auto sg_source   = sub_graph.at( sub_graph.getSourceID() );
-    for( auto child : sg_source.childrenList ) { //create dag_source->v
-        if( child != sub_graph.getTerminalID() ) {
-            dag->createDirectedEdge( dag->getSourceID(), child );
-        }
-    }
-
-    //create v'<-r' in DAG
-    auto sg_terminal = sub_graph.at( sub_graph.getTerminalID() );
-    for( auto parent : sg_terminal.parentsList ) { //create v<-dag_terminal
-        if( parent != sub_graph.getSourceID() ) {
-            auto dag_duplicate = dag->findLocalID( parent + dag->getUniqueNodeCount() - 2 );
-            if( dag_duplicate != dag->end() ) {
-                dag->createDirectedEdge( dag_duplicate->first, dag->getTerminalID() );
-            } else {
-                LOG_ERROR( "[sbp::algo::GraphToDAG::convertToDAG( <graph::SubGraph>, ", dag_name, ")] "
-                    "Problem finding the duplicate ID [", dag_duplicate->first ,"] of local node [", parent, "] in the DAG." );
-            }
-        }
-    }
-
-    //if no out-degree from r, choose random v as source/root (not really random but does the trick..)
-    auto root = sg_source.childrenList.empty() ? 3 : sub_graph.getSourceID();
-    auto sg_colours = std::vector<DFSColours>( sub_graph.size(), DFSColours::WHITE );
-    visitUsingDFS( sub_graph, root, sg_colours, 0, *dag_pack );
-
-    //adjust source and terminal vertices
-    if( sg_source.childrenList.empty() ) { //G does not contain r
-        for( auto it = std::next( dag->begin(), 2 ); it != dag->end(); ++it ) {
-            if( it->second.parentsList.empty() ) { //in-degree == 0
-                //for every u ∈ V (G ) such that u has no incoming edge in G' create an edge (r, u)
-                dag->createDirectedEdge( dag->getSourceID(), it->first );
-            }
-        }
-    }
-    if( sg_terminal.parentsList.empty() ) { //G does not contain r'
-        for( auto it = std::next( dag->begin(), 2 ); it != dag->end(); ++it ) {
-            if( it->second.childrenList.empty() ) { //out-degree == 0
-                //for every u ∈ V (G ) such that u has no outgoing edge in G' create an edge (u, r')
-                dag->createDirectedEdge( it->first, dag->getTerminalID() );
-            }
-        }
-    }
 }

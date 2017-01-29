@@ -41,14 +41,15 @@ namespace sbp {
                 GREY,
                 BLACK
             };
-            void visitUsingDFS( const sbp::graph::SubGraph &sub_graph,
-                                const size_t &u,
-                                std::vector<sbp::algo::GraphToDAG::DFSColours> &colour,
-                                size_t time,
-                                DAG_Package &dag_pack );
+            std::unique_ptr<DAG_List_t> _dag_package_list;
+
             void convertToDAG( const graph::SubGraph &sub_graph,
                                const std::string &dag_name );
-            std::unique_ptr<DAG_List_t> _dag_package_list;
+            void visitUsingDFS( const graph::SubGraph &sub_graph,
+                                const size_t &u,
+                                std::vector<DFSColours> &colour,
+                                size_t time,
+                                DAG_Package &dag_pack );
         };
     }
 }
