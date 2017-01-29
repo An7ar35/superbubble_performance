@@ -22,10 +22,13 @@ sbp::algo::SB_QLinear::~SB_QLinear() {}
 bool sbp::algo::SB_QLinear::run( std::list<sbp::algo::container::SuperBubble> &superbubble_list ) {
     //Find SCCs
     auto found_SCCs = Tarjan( _graph ).findSCCs();
+
     //Partition graph into sub-graphs
     auto sub_graphs = PartitionGraph().partitionSCCs( _graph, *found_SCCs, "SubGraph" );
     found_SCCs.reset(); //no longer needed so early destruction to free up memory
 
+    //Convert SubGraphs into DAG
+    auto dag_packages = sbp::algo::GraphToDAG().convertToDAG( *sub_graphs, "DAG" );
 
     return false;
 }

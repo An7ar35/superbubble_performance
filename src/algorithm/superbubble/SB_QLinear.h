@@ -7,7 +7,7 @@
                     IEEE/ACM Transactions on Computational Biology and Bioinformatics, Vol. 12, No. 4, July/August 2015
 
     @dependencies   eadlib::WeightedGraph<T>, eadlib::Graph<T>,
-                    sbp::algo::container::SuperBubble, sbp::algo::Tarjan
+                    sbp::algo::container::SuperBubble, sbp::algo::Tarjan, sbp::algo::GraphToDAG
 
     @author         E. A. Davison
     @copyright      E. A. Davison 2016
@@ -26,6 +26,7 @@
 #include "container/SuperBubble.h"
 #include "../Tarjan.h"
 #include "../PartitionGraph.h"
+#include "../GraphToDAG.h"
 
 namespace sbp {
     namespace algo {

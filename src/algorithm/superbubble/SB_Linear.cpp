@@ -26,6 +26,8 @@ bool sbp::algo::SB_Linear::run( std::list<container::SuperBubble> &superbubble_l
     auto sub_graphs = PartitionGraph().partitionSCCs( _graph, *found_SCCs, "SubGraph" );
     found_SCCs.reset(); //no longer needed so early destruction to free up memory
 
+    //Convert SubGraphs into DAG
+    auto dag_packages = sbp::algo::GraphToDAG().convertToDAG( *sub_graphs, "DAG" );
 
 
     //TODO
