@@ -78,7 +78,7 @@ if( GTEST_FOUND )
             tests/main.cpp
             tests/Tarjan_test.h
             tests/PartitionGraph_test.h
-            tests/GraphToDAG_test.h)
+            tests/GraphToDAG_test.h tests/SB_Linear_test.h)
 
     add_executable(
             sbp_tests
