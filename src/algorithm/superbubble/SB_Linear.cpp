@@ -138,3 +138,59 @@ void sbp::algo::SB_Linear::generateCandidateList( const sbp::graph::DAG &dag,
     }
 }
 
+/**
+ * Generates outChild
+ * @param dag       DAG
+ * @param ordD      //TODO
+ * @param out_child Container for outChildren
+ */
+void sbp::algo::SB_Linear::generateOutChildren( const sbp::graph::DAG &dag,
+                                                const std::vector<size_t> &ordD,
+                                                std::vector<size_t> &out_child ) {
+
+    size_t max_order { 0 };
+    for( auto it = dag.begin(); it != dag.end(); ++it ) {
+        for( auto child : it->second.childrenList ) {
+            if( ordD.at( child ) >= max_order ) {
+                max_order = ordD.at( child );
+            }
+        }
+        out_child.at( ordD.at( it->first ) ) = max_order;
+    }
+}
+
+/**
+ * Generates outParent
+ * @param dag        DAG
+ * @param ordD       //TODO
+ * @param out_parent Container for outParents
+ */
+void sbp::algo::SB_Linear::generateOutParents( const sbp::graph::DAG &dag,
+                                               const std::vector<size_t> &ordD,
+                                               std::vector<size_t> &out_parent ) {
+
+    size_t min_order { dag.nodeCount() };
+    for( auto it = dag.begin(); it != dag.end(); ++it ) {
+        for( auto parent : it->second.parentsList ) {
+            if( ordD.at( parent ) < min_order ) {
+                min_order = ordD.at( parent );
+            }
+        }
+        out_parent.at( ordD.at( it->first ) ) = min_order;
+    }
+}
+
+/**
+ * Prepare for constant time RMQ
+ * @param out_child
+ * @param out_parent
+ * @param rmq_out_child
+ * @param rmq_out_parent
+ */
+void sbp::algo::SB_Linear::prepareForRMQ( const std::vector<size_t> &out_child,
+                                          const std::vector<size_t> &out_parent,
+                                          std::vector<size_t> &rmq_out_child,
+                                          std::vector<size_t> &rmq_out_parent ) {
+    //TODO
+}
+

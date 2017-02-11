@@ -48,8 +48,6 @@ namespace sbp {
                 size_t                     _node_ID;
                 bool                       _entrance_flag;
                 std::shared_ptr<Candidate> _previous_entrance;
-//                std::shared_ptr<Candidate> _previous_candidate;
-//                std::shared_ptr<Candidate> _next_candidate;
             };
 
             void fillTopologicalOrder( const graph::DAG &dag,
@@ -65,6 +63,19 @@ namespace sbp {
                                         const std::vector<size_t> &invOrd,
                                         std::list<std::shared_ptr<Candidate>> &candidate_list,
                                         std::vector<std::shared_ptr<Candidate>> &pvsEntrance );
+
+            void generateOutChildren( const graph::DAG &dag,
+                                      const std::vector<size_t> &ordD,
+                                      std::vector<size_t> &out_child );
+
+            void generateOutParents( const graph::DAG &dag,
+                                     const std::vector<size_t> &ordD,
+                                     std::vector<size_t> &out_parent );
+
+            void prepareForRMQ( const std::vector<size_t> &out_child,
+                                const std::vector<size_t> &out_parent,
+                                std::vector<size_t> &rmq_out_child,
+                                std::vector<size_t> &rmq_out_parent );
 
             const eadlib::WeightedGraph<size_t> _graph;
         };
