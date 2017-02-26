@@ -48,7 +48,7 @@ set(SOURCE_FILES
         src/algorithm/PartitionGraph.cpp
         src/algorithm/PartitionGraph.h
         src/algorithm/GraphToDAG.cpp
-        src/algorithm/GraphToDAG.h)
+        src/algorithm/GraphToDAG.h src/chrono/Timer.cpp src/chrono/Timer.h)
 
 set(SQLITE3_FILES
         external/sqlite3/sqlite3.h
@@ -78,7 +78,7 @@ if( GTEST_FOUND )
             tests/main.cpp
             tests/Tarjan_test.h
             tests/PartitionGraph_test.h
-            tests/GraphToDAG_test.h tests/SB_Linear_test.h)
+            tests/GraphToDAG_test.h tests/SB_Linear_test.h tests/Timer_test.h)
 
     add_executable(
             sbp_tests

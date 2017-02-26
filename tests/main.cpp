@@ -2,6 +2,7 @@
 #include "PartitionGraph_test.h"
 #include "GraphToDAG_test.h"
 #include "SB_Linear_test.h"
+#include "Timer_test.h"
 
 #include "gtest/gtest.h"
 

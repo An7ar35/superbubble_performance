@@ -12,6 +12,7 @@
 #include <eadlib/io/FileWriter.h>
 #include <eadlib/datastructure/WeightedGraph.h>
 
+#include "../../chrono/Timer.h"
 #include "SB_Linear.h"
 #include "SB_QLinear.h"
 
